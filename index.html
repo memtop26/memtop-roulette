@@ -11,58 +11,48 @@
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     background:radial-gradient(circle at 50% 30%, #2d1b4e 0%, #1a0b2e 70%);
     color:#fff; display:flex; flex-direction:column; align-items:center;
-    padding:24px 16px; min-height:100vh; user-select:none; overflow-x:hidden;
+    padding:20px 16px; min-height:100vh; user-select:none; overflow-x:hidden;
   }
-  h1 { font-size:24px; font-weight:800; color:#ffd700; text-shadow:0 2px 12px rgba(255,215,0,.35); }
-  .subtitle { font-size:13px; color:#b8a5d9; margin:4px 0 14px; }
+  h1 { font-size:22px; font-weight:800; color:#ffd700; text-shadow:0 2px 12px rgba(255,215,0,.35); }
+  .subtitle { font-size:12px; color:#b8a5d9; margin:4px 0 12px; }
   .coins-box { background:rgba(255,255,255,.08); border:1px solid rgba(255,215,0,.35);
-    border-radius:20px; padding:8px 22px; font-weight:700; margin-bottom:20px; }
+    border-radius:20px; padding:7px 20px; font-weight:700; margin-bottom:18px; font-size:14px; }
   .coins-box span { color:#ffd700; }
-  .wheel-wrap { position:relative; width:300px; height:300px; margin-bottom:26px; }
-  .pointer { position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:0; height:0;
-    border-left:14px solid transparent; border-right:14px solid transparent; border-top:24px solid #ffd700;
+  .wheel-wrap { position:relative; width:290px; height:290px; margin-bottom:22px; }
+  .pointer { position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:0; height:0;
+    border-left:13px solid transparent; border-right:13px solid transparent; border-top:22px solid #ffd700;
     z-index:6; filter:drop-shadow(0 3px 6px rgba(0,0,0,.5)); }
   .wheel {
     width:100%; height:100%; border-radius:50%;
-    /* Жёлтый 1%, Красный 10%, Синий 5%, Фиолет 5%, Серый 79% */
-    background:conic-gradient(
-      #ffd700 0deg 3.6deg,          /* 1%  - Топикоины */
-      #ff4757 3.6deg 39.6deg,       /* 10% - Бан */
-      #3742fa 39.6deg 57.6deg,      /* 5%  - Тег Счастливчик */
-      #9b59b6 57.6deg 75.6deg,      /* 5%  - Тег Джокер */
-      #555 75.6deg 360deg           /* 79% - Ничего */
-    );
     border:6px solid #ffd700;
     box-shadow:0 0 40px rgba(255,215,0,.35), 0 0 90px rgba(138,43,226,.25), inset 0 0 30px rgba(0,0,0,.35);
-    position:relative;
+    position:relative; overflow:hidden;
     transition:transform 5s cubic-bezier(.17,.67,.21,.99);
   }
-  .seg-label { position:absolute; inset:0; display:flex; justify-content:center; pointer-events:none; }
-  .seg-label span { margin-top:14px; font-size:11px; font-weight:800; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8); text-align:center; padding:0 4px; }
-  .seg-label.gold span { color:#1a0b2e; text-shadow:none; }
-  .hub { position:absolute; left:50%; top:50%; width:56px; height:56px; transform:translate(-50%,-50%);
+  .seg-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+  .seg-label span { display:block; font-weight:800; font-size:15px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+  .hub { position:absolute; left:50%; top:50%; width:54px; height:54px; transform:translate(-50%,-50%);
     background:radial-gradient(circle at 35% 30%, #ffe28a, #d4a017); border-radius:50%;
     display:flex; align-items:center; justify-content:center; font-size:24px;
     box-shadow:0 0 20px rgba(255,215,0,.8); z-index:5; }
   .spin-btn { background:linear-gradient(135deg,#8b3dff,#6a1bb8); border:2px solid #b47aff; color:#fff;
-    font-size:17px; font-weight:800; letter-spacing:1px; padding:14px 54px; border-radius:28px; cursor:pointer;
+    font-size:17px; font-weight:800; letter-spacing:1px; padding:14px 52px; border-radius:28px; cursor:pointer;
     box-shadow:0 8px 26px rgba(138,43,226,.5); transition:transform .1s; }
   .spin-btn:active { transform:scale(.96); }
   .spin-btn:disabled { opacity:.5; cursor:not-allowed; }
-  .legend { margin-top:22px; width:100%; max-width:340px; background:rgba(255,255,255,.06); border-radius:16px; padding:14px 16px; }
-  .legend-item { display:flex; align-items:center; gap:10px; padding:4px 0; font-size:12px; }
-  .dot { width:14px; height:14px; border-radius:50%; flex-shrink:0; }
-  .dot-gold{background:#ffd700;} .dot-red{background:#ff4757;} 
-  .dot-blue{background:#3742fa;} .dot-purple{background:#9b59b6;} .dot-gray{background:#555;}
+  .legend { margin-top:18px; width:100%; max-width:340px; background:rgba(255,255,255,.06);
+    border-radius:16px; padding:12px 14px; max-height:150px; overflow-y:auto; }
+  .legend-item { display:flex; align-items:center; gap:8px; padding:3px 0; font-size:12px; }
+  .dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(8px);
     display:none; align-items:center; justify-content:center; z-index:50; }
   .overlay.show { display:flex; animation:fade .25s; }
   .result-box { background:linear-gradient(135deg,#2d1b4e,#1a0b2e); border:2px solid #ffd700; border-radius:24px;
-    padding:28px 24px; text-align:center; max-width:300px; animation:pop .35s cubic-bezier(.18,.89,.32,1.28); }
-  .result-emoji { font-size:60px; margin-bottom:10px; }
-  .result-title { font-size:22px; font-weight:800; margin-bottom:8px; }
-  .result-text { font-size:13px; color:#b8a5d9; line-height:1.5; margin-bottom:16px; }
-  .close-btn { background:#ffd700; color:#1a0b2e; border:none; padding:12px 34px; border-radius:20px; font-weight:800; font-size:15px; cursor:pointer; }
+    padding:26px 24px; text-align:center; max-width:290px; animation:pop .35s cubic-bezier(.18,.89,.32,1.28); }
+  .result-emoji { font-size:58px; margin-bottom:10px; }
+  .result-title { font-size:20px; font-weight:800; margin-bottom:6px; }
+  .result-text { font-size:12px; color:#b8a5d9; line-height:1.5; margin-bottom:14px; }
+  .close-btn { background:#ffd700; color:#1a0b2e; border:none; padding:11px 32px; border-radius:20px; font-weight:800; font-size:15px; cursor:pointer; }
   @keyframes fade { from{opacity:0} to{opacity:1} }
   @keyframes pop { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
 </style>
@@ -75,31 +65,20 @@
   <div class="wheel-wrap">
     <div class="pointer"></div>
     <div class="wheel" id="wheel">
-      <div class="seg-label gold" style="transform:rotate(1.8deg)"><span>10🪙</span></div>
-      <div class="seg-label" style="transform:rotate(21.6deg)"><span>БАН</span></div>
-      <div class="seg-label" style="transform:rotate(48.6deg)"><span>🍀</span></div>
-      <div class="seg-label" style="transform:rotate(66.6deg)"><span>🃏</span></div>
-      <div class="seg-label" style="transform:rotate(217.8deg)"><span>Пусто</span></div>
       <div class="hub">💎</div>
     </div>
   </div>
 
   <button class="spin-btn" id="spinBtn">КРУТИТЬ</button>
 
-  <div class="legend">
-    <div class="legend-item"><div class="dot dot-gold"></div><b>1%</b> — 10 Топикоинов 🪙</div>
-    <div class="legend-item"><div class="dot dot-red"></div><b>10%</b> — Бан на 5 часов</div>
-    <div class="legend-item"><div class="dot dot-blue"></div><b>5%</b> — Тег 🍀 Счастливчик</div>
-    <div class="legend-item"><div class="dot dot-purple"></div><b>5%</b> — Тег 🃏 Джокер</div>
-    <div class="legend-item"><div class="dot dot-gray"></div><b>79%</b> — Ничего</div>
-  </div>
+  <div class="legend" id="legend"></div>
 
   <div class="overlay" id="overlay">
     <div class="result-box">
       <div class="result-emoji" id="rEmoji">🎉</div>
       <div class="result-title" id="rTitle"></div>
       <div class="result-text" id="rText"></div>
-      <button class="close-btn" id="closeBtn">ОК</button>
+      <button class="close-btn" id="closeBtn">КРУТИТЬ ЕЩЁ</button>
     </div>
   </div>
 
@@ -116,34 +95,73 @@ try {
     if (m2) userCoins = parseInt(m2[1], 10) || 0;
   }
 } catch(e) {}
-document.getElementById('coins').textContent = userCoins;
+const coinsEl = document.getElementById('coins');
+coinsEl.textContent = userCoins;
 
-const wheel   = document.getElementById('wheel');
+/* Сектора: prob = реальный шанс, vis = визуальный угол (для красоты) */
+const SECTORS = [
+  {t:'coin',        prob:1,  vis:20,  label:'🪙', color:'#ffd700', txt:'#1a0b2e'},
+  {t:'ban',         prob:9,  vis:40,  label:'БАН', color:'#ff4757'},
+  {t:'tag_lucky',   prob:5,  vis:15,  label:'🍀', color:'#3742fa'},
+  {t:'tag_joker',   prob:5,  vis:15,  label:'🃏', color:'#9b59b6'},
+  {t:'tag_memolog', prob:5,  vis:15,  label:'🎭', color:'#e67e22'},
+  {t:'tag_vip',     prob:5,  vis:15,  label:'💎', color:'#1abc9c'},
+  {t:'tag_pepe',    prob:5,  vis:15,  label:'🐸', color:'#2ecc71'},
+  {t:'tag_tsar',    prob:5,  vis:15,  label:'👑', color:'#f1c40f'},
+  {t:'tag_syrok',   prob:5,  vis:15,  label:'🧀', color:'#f39c12'},
+  {t:'tag_medved',  prob:5,  vis:15,  label:'🐻', color:'#8b4513'},
+  {t:'tag_temny',   prob:5,  vis:15,  label:'🌚', color:'#34495e'},
+  {t:'tag_turbo',   prob:5,  vis:15,  label:'🐢', color:'#16a085'},
+  {t:'tag_obereg',  prob:5,  vis:15,  label:'🧿', color:'#2980b9'},
+  {t:'tag_skuf',    prob:5,  vis:15,  label:'🐍', color:'#27ae60'},
+  {t:'tag_dino',    prob:5,  vis:15,  label:'🦖', color:'#7f8c8d'},
+  {t:'tag_pchela',  prob:5,  vis:15,  label:'🐝', color:'#f5b041'},
+  {t:'nothing',     prob:20, vis:90,  label:'Пусто', color:'#555'},
+];
+
+const wheel = document.getElementById('wheel');
 const spinBtn = document.getElementById('spinBtn');
 const overlay = document.getElementById('overlay');
 
-/* Сектора:
-   0-3.6°      = coin (1%)
-   3.6-39.6°   = ban (10%)
-   39.6-57.6°  = tag_lucky (5%)
-   57.6-75.6°  = tag_joker (5%)
-   75.6-360°   = nothing (79%)
-*/
-const SECTORS = {
-  coin:      { center: 1.8,   half: 1.8 },
-  ban:       { center: 21.6,  half: 18 },
-  tag_lucky: { center: 48.6,  half: 9 },
-  tag_joker: { center: 66.6,  half: 9 },
-  nothing:   { center: 217.8, half: 142 }
-};
+/* Рисуем колесо + метки */
+let acc = 0, stops = [], centers = [];
+SECTORS.forEach(s => {
+  stops.push(s.color + ' ' + acc + 'deg ' + (acc + s.vis) + 'deg');
+  centers.push(acc + s.vis / 2);
+  acc += s.vis;
+});
+wheel.style.background = 'conic-gradient(' + stops.join(',') + ')';
+SECTORS.forEach((s, i) => {
+  const c = centers[i];
+  const d = document.createElement('div');
+  d.className = 'seg-label';
+  d.style.transform = 'rotate(' + c + 'deg)';
+  d.innerHTML = '<span style="transform: translateY(-100px) rotate(' + (-c) + 'deg);' +
+                (s.txt ? ('color:' + s.txt + ';text-shadow:none;') : '') + '">' + s.label + '</span>';
+  wheel.appendChild(d);
+});
 
+/* Легенда */
+const legend = document.getElementById('legend');
+SECTORS.forEach(s => {
+  const div = document.createElement('div');
+  div.className = 'legend-item';
+  div.innerHTML = '<div class="dot" style="background:' + s.color + '"></div><b>' + s.prob + '%</b> — ' +
+    (s.t === 'coin' ? '10 Топикоинов 🪙' :
+     s.t === 'ban' ? 'Бан на 5 часов' :
+     s.t === 'nothing' ? 'Ничего' : 'Тег ' + s.label);
+  legend.appendChild(div);
+});
+
+/* Roll по реальным шансам */
 function roll() {
   const r = Math.random() * 100;
-  if (r < 1)  return 'coin';      // 1%
-  if (r < 11) return 'ban';       // 10%
-  if (r < 16) return 'tag_lucky'; // 5%
-  if (r < 21) return 'tag_joker'; // 5%
-  return 'nothing';               // 79%
+  let acc = 0;
+  for (let i = 0; i < SECTORS.length; i++) {
+    acc += SECTORS[i].prob;
+    if (r < acc) return i;
+  }
+  return SECTORS.length - 1;
 }
 
 let rot = 0, spinning = false;
@@ -153,53 +171,48 @@ spinBtn.addEventListener('click', () => {
   spinning = true; spinBtn.disabled = true;
   if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
-  const res = roll();
-  const s = SECTORS[res];
-  const jitter = (Math.random() * 2 - 1) * Math.max(1, s.half - 2);
-  const target = s.center + jitter;
-  const turns  = 5 + Math.floor(Math.random() * 3);
+  const idx = roll();
+  const s = SECTORS[idx];
+  const jitter = (Math.random() * 2 - 1) * Math.max(1, s.vis / 2 - 2);
+  const target = centers[idx] + jitter;
+  const turns = 5 + Math.floor(Math.random() * 3);
   rot += turns * 360 + ((360 - target) - (rot % 360));
   wheel.style.transform = 'rotate(' + rot + 'deg)';
 
-  setTimeout(() => {
-    showResult(res);
-    spinning = false; spinBtn.disabled = false;
-  }, 5200);
+  setTimeout(() => { showResult(idx); spinning = false; spinBtn.disabled = false; }, 5200);
 });
 
-function showResult(res) {
+function showResult(idx) {
+  const s = SECTORS[idx];
   const e = document.getElementById('rEmoji');
   const t = document.getElementById('rTitle');
   const x = document.getElementById('rText');
-  
-  if (res === 'coin') {
+
+  if (s.t === 'coin') {
     e.textContent = '🪙'; t.textContent = 'ТОПИКОИНЫ!'; t.style.color = '#ffd700';
-    x.textContent = 'Поздравляем! +10 Топикоинов! Владельцы уже в курсе твоей удачи! 🎉';
+    x.textContent = '+10 Топикоинов! Крути ещё!';
+    userCoins += 10; coinsEl.textContent = userCoins;
     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  } else if (res === 'ban') {
+  } else if (s.t === 'ban') {
     e.textContent = '🚫'; t.textContent = 'БАН!'; t.style.color = '#ff4757';
-    x.textContent = 'Ты забанен на 5 часов. Отдохни пока!';
+    x.textContent = 'Бан на 5 часов. Отдохни!';
     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-  } else if (res === 'tag_lucky') {
-    e.textContent = '🍀'; t.textContent = 'СЧАСТЛИВЧИК!'; t.style.color = '#3742fa';
-    x.textContent = 'Ты получил тег 🍀 Счастливчик! Он теперь рядом с твоим именем.';
-    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  } else if (res === 'tag_joker') {
-    e.textContent = '🃏'; t.textContent = 'ДЖОКЕР!'; t.style.color = '#9b59b6';
-    x.textContent = 'Ты получил тег 🃏 Джокер! Дикая карта в игре судеб.';
-    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  } else {
+  } else if (s.t === 'nothing') {
     e.textContent = '💨'; t.textContent = 'ПУСТО...'; t.style.color = '#888';
-    x.textContent = 'В этот раз ничего не выпало. Крути ещё!';
+    x.textContent = 'Ничего не выпало. Крути ещё!';
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+  } else {
+    e.textContent = s.label; t.textContent = 'ТЕГ ПОЛУЧЕН!'; t.style.color = '#ffd700';
+    x.textContent = 'Теперь у тебя тег ' + s.label + '!';
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
   }
   overlay.classList.add('show');
-  if (tg) { try { tg.sendData(JSON.stringify({ type: res })); } catch(e) {} }
+  if (tg) { try { tg.sendData(JSON.stringify({ type: s.t })); } catch(e) {} }
 }
 
+/* Кнопка НЕ закрывает приложение — просто убирает окошко */
 document.getElementById('closeBtn').addEventListener('click', () => {
   overlay.classList.remove('show');
-  setTimeout(() => { if (tg) tg.close(); }, 250);
 });
 </script>
 </body>
