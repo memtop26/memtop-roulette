@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>МЕМТОП Рулетка</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(180deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%);
+    color: #fff;
+    overflow: hidden;
+    user-select: none;
+}
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 15px;
+    position: relative;
+}
+h1 {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    background: linear-gradient(90deg, #ffd700, #ffaa00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+}
+.subtitle {
+    font-size: 13px;
+    color: #b8a5d9;
+    margin-bottom: 25px;
+}
+.coins-box {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 20px;
+    padding: 8px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+.coins-box span { color: #ffd700; }
+
+.wheel-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: 10px 0 30px;
+}
+.wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), 0 0 80px rgba(138, 43, 226, 0.3);
+    border: 8px solid #ffd700;
+    transition: transform 5s cubic-bezier(0.17, 0.67, 0.21, 0.99);
+    background: #2d1b4e;
+}
+.wheel.spinning { transition: transform 5s cubic-bezier(0.17, 0.67, 0.21, 0.99); }
+
+.sector {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    top: 0;
+    right: 0;
+    transform-origin: 0% 100%;
+    clip-path: polygon(0 100%, 100% 100%, 100% 0);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 25px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.sector-label {
+    transform: rotate(18deg) translateX(-10px);
+    white-space: nowrap;
+}
+
+.pointer {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 35px solid #ffd700;
+    z-index: 10;
+    filter: drop-shadow(0 3px 5px rgba(0,0,0,0.5));
+}
+.pointer::after {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: -15px;
+    width: 30px;
+    height: 30px;
+    background: #ffd700;
+    border-radius: 50%;
+}
+
+.center-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, #ffd700, #b8860b);
+    border-radius: 50%;
+    z-index: 5;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.spin-btn {
+    background: linear-gradient(135deg, #8b3dff 0%, #6a1bb8 100%);
+    border: 2px solid #b47aff;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 16px 50px;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(138, 43, 226, 0.5);
+    transition: transform 0.1s, box-shadow 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.spin-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+}
+.spin-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.legend {
+    margin-top: 25px;
+    width: 100%;
+    max-width: 320px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 12px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+}
+.legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.dot-coin { background: #ffd700; }
+.dot-ban { background: #ff4757; }
+.dot-expel { background: #3742fa; }
+
+.result-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+.result-overlay.show { display: flex; animation: fadeIn 0.3s; }
+.result-box {
+    background: linear-gradient(135deg, #2d1b4e, #1a0b2e);
+    border: 2px solid #ffd700;
+    border-radius: 25px;
+    padding: 30px 25px;
+    text-align: center;
+    max-width: 300px;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.result-emoji { font-size: 70px; margin-bottom: 15px; }
+.result-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+.result-text { font-size: 14px; color: #b8a5d9; margin-bottom: 20px; line-height: 1.5; }
+.close-btn {
+    background: #ffd700;
+    color: #1a0b2e;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>🎰 МЕМТОП РУЛЕТКА</h1>
+    <div class="subtitle">Испытай свою удачу</div>
+
+    <div class="coins-box">
+        🪙 Монет: <span id="coins">0</span>
+    </div>
+
+    <div class="wheel-wrapper">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel"></div>
+        <div class="center-circle">💎</div>
+    </div>
+
+    <button class="spin-btn" id="spinBtn">КРУТИТЬ</button>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot dot-coin"></div><b>1%</b> — Топкоин (+100 🪙)</div>
+        <div class="legend-item"><div class="legend-dot dot-ban"></div><b>49%</b> — Бан (24 часа)</div>
+        <div class="legend-item"><div class="legend-dot dot-expel"></div><b>50%</b> — Отчисление</div>
+    </div>
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+    <div class="result-box">
+        <div class="result-emoji" id="resultEmoji">🎉</div>
+        <div class="result-title" id="resultTitle">Результат</div>
+        <div class="result-text" id="resultText">Текст</div>
+        <button class="close-btn" onclick="closeResult()">ОК</button>
+    </div>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+// Параметры из бота
+const initData = tg.initDataUnsafe?.user;
+const userId = initData?.id || 0;
+const userName = initData?.first_name || 'Игрок';
+
+// Получаем текущие монеты из initData (если бот передал)
+let userCoins = parseInt(tg.initDataUnsafe?.start_param || '0') || 0;
+document.getElementById('coins').textContent = userCoins;
+
+// Сектора: 10 штук (1 топкоин, 4 бана, 5 отчислений) = 10%, 40%, 50%
+// Но для точных шансов 1/49/50 считаем рандом отдельно, а колесо крутим к результату
+const SECTORS = [
+    { name: 'ТОПКОИН', color: '#ffd700', textColor: '#1a0b2e', emoji: '🪙' },
+    { name: 'БАН',     color: '#ff4757', textColor: '#fff',     emoji: '🚫' },
+    { name: 'ОТЧИСЛ.', color: '#3742fa', textColor: '#fff',     emoji: '🎓' },
+    { name: 'БАН',     color: '#ff4757', textColor: '#fff',     emoji: '🚫' },
+    { name: 'ОТЧИСЛ.', color: '#3742fa', textColor: '#fff',     emoji: '🎓' },
+    { name: 'БАН',     color: '#ff4757', textColor: '#fff',     emoji: '🚫' },
+    { name: 'ОТЧИСЛ.', color: '#3742fa', textColor: '#fff',     emoji: '🎓' },
+    { name: 'БАН',     color: '#ff4757', textColor: '#fff',     emoji: '🚫' },
+    { name: 'ОТЧИСЛ.', color: '#3742fa', textColor: '#fff',     emoji: '🎓' },
+    { name: 'ОТЧИСЛ.', color: '#3742fa', textColor: '#fff',     emoji: '🎓' },
+];
+
+const SECTOR_ANGLE = 360 / SECTORS.length; // 36°
+const wheel = document.getElementById('wheel');
+const spinBtn = document.getElementById('spinBtn');
+
+// Рисуем секторы
+SECTORS.forEach((s, i) => {
+    const sector = document.createElement('div');
+    sector.className = 'sector';
+    sector.style.background = s.color;
+    sector.style.color = s.textColor;
+    sector.style.transform = `rotate(${i * SECTOR_ANGLE}deg) skewY(-${90 - SECTOR_ANGLE}deg)`;
+    sector.innerHTML = `<div class="sector-label" style="transform: rotate(${SECTOR_ANGLE/2}deg) translateX(-15px);">${s.emoji} ${s.name}</div>`;
+    wheel.appendChild(sector);
+});
+
+let currentRotation = 0;
+let isSpinning = false;
+
+function rollResult() {
+    const r = Math.random() * 100;
+    if (r < 1) return { type: 'coin', sectorIndex: 0 };
+    if (r < 50) {
+        const banIndices = [1, 3, 5, 7];
+        return { type: 'ban', sectorIndex: banIndices[Math.floor(Math.random() * banIndices.length)] };
+    }
+    const expelIndices = [2, 4, 6, 8, 9];
+    return { type: 'expel', sectorIndex: expelIndices[Math.floor(Math.random() * expelIndices.length)] };
+}
+
+spinBtn.addEventListener('click', () => {
+    if (isSpinning) return;
+    isSpinning = true;
+    spinBtn.disabled = true;
+
+    const result = rollResult();
+    // Угол, на который нужно повернуть, чтобы нужный сектор был сверху (под указателем)
+    const targetSectorAngle = result.sectorIndex * SECTOR_ANGLE + SECTOR_ANGLE / 2;
+    const fullSpins = 6 + Math.floor(Math.random() * 3); // 6-8 полных оборотов
+    const finalRotation = currentRotation + fullSpins * 360 + (360 - targetSectorAngle);
+
+    wheel.style.transition = 'transform 5s cubic-bezier(0.17, 0.67, 0.21, 0.99)';
+    wheel.style.transform = `rotate(${finalRotation}deg)`;
+    currentRotation = finalRotation;
+
+    // Вибрация
+    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+    setTimeout(() => {
+        showResult(result);
+        isSpinning = false;
+        spinBtn.disabled = false;
+    }, 5100);
+});
+
+function showResult(result) {
+    const overlay = document.getElementById('resultOverlay');
+    const emoji = document.getElementById('resultEmoji');
+    const title = document.getElementById('resultTitle');
+    const text = document.getElementById('resultText');
+
+    let payload = { type: result.type, userId: userId };
+
+    if (result.type === 'coin') {
+        emoji.textContent = '🪙';
+        title.textContent = 'ТОПКОИН!';
+        title.style.color = '#ffd700';
+        text.textContent = 'Поздравляем! +100 монет к твоему балансу! 🎉';
+        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    } else if (result.type === 'ban') {
+        emoji.textContent = '🚫';
+        title.textContent = 'БАН!';
+        title.style.color = '#ff4757';
+        text.textContent = 'Ты забанен на 24 часа... Увидимся завтра!';
+        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+    } else {
+        emoji.textContent = '🎓';
+        title.textContent = 'ОТЧИСЛЕНИЕ!';
+        title.style.color = '#3742fa';
+        text.textContent = 'Монеты сгорели 🔥 Рулетка закрыта на 24 часа.';
+        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+    }
+
+    overlay.classList.add('show');
+
+    // Отправляем результат в бота
+    tg.sendData(JSON.stringify(payload));
+}
+
+function closeResult() {
+    document.getElementById('resultOverlay').classList.remove('show');
+    // Закрываем Web App после показа результата
+    setTimeout(() => {
+        tg.close();
+    }, 300);
+}
+
+// Если бот закрыл Web App раньше — не проблема
+</script>
+</body>
+</html>
