@@ -144,7 +144,9 @@ function showResult(it){
  else if(it.t==='ban'){x.textContent='Бан на 5 часов. Отдохни!';if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('error');}
  else{x.textContent='Тег теперь рядом с твоим именем!';confetti();if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');}
  overlay.classList.add('show');
- if(tg){try{tg.sendData(JSON.stringify({type:it.t}));}catch(e){}}
+let sentOk = false, sendErr = '';
+try { tg.sendData(JSON.stringify({type: it.t})); sentOk = true; } catch(e) { sendErr = String(e); }
+x.textContent += sentOk ? '\n✅ Данные ушли боту' : ('\n⚠️ sendData ошибка: ' + sendErr);
 }
 document.getElementById('closeBtn').addEventListener('click',()=>overlay.classList.remove('show'));
 const legend=document.getElementById('legend');
