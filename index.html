@@ -104,9 +104,9 @@ const ITEMS=[
  {t:'tag_joker',em:'🃏',nm:'Джокер',rar:'rare',ch:4},
  {t:'tag_dino', em:'🦖',nm:'Дино',rar:'rare',ch:4},
  {t:'tag_obereg',em:'🧿',nm:'Оберег',rar:'rare',ch:4},
- {t:'tag_vip', em:'💎',nm:'VIP',rar:'legendary',ch:2},
- {t:'coin', em:'🪙',nm:'10 Топикоинов',rar:'gold',ch:5},
- {t:'ban', em:'🚫',nm:'Бан 5 часов',rar:'ban',ch:5},
+ {t:'tag_vip', em:'💎',nm:'VIP',rar:'legendary',ch:4},
+ {t:'coin', em:'🪙',nm:'10 Топикоинов',rar:'gold',ch:2},
+ {t:'ban', em:'🚫',nm:'Бан 5 часов',rar:'ban',ch:6},
 ];
 function roll(){const r=Math.random()*100;let a=0;for(const it of ITEMS){a+=it.ch;if(r<a)return it;}return ITEMS[ITEMS.length-1];}
 function fillIndex(){const pool=[];ITEMS.forEach((it,i)=>{for(let k=0;k<it.ch;k++)pool.push(i);});return pool[Math.floor(Math.random()*pool.length)];}
