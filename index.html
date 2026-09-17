@@ -3,82 +3,78 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>МЕМТОП Рулетка</title>
+<title>МЕМТОП Кейс</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body {
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    background:radial-gradient(circle at 50% 30%, #2d1b4e 0%, #1a0b2e 70%);
-    color:#fff; display:flex; flex-direction:column; align-items:center;
-    padding:20px 16px; min-height:100vh; user-select:none; overflow-x:hidden;
+    background:radial-gradient(circle at 50% 20%, #2d1b4e 0%, #12081f 70%);
+    color:#fff; min-height:100vh; user-select:none; overflow-x:hidden;
+    display:flex; flex-direction:column; align-items:center; padding:20px 0;
   }
   h1 { font-size:22px; font-weight:800; color:#ffd700; text-shadow:0 2px 12px rgba(255,215,0,.35); }
-  .subtitle { font-size:12px; color:#b8a5d9; margin:4px 0 12px; }
-  .coins-box { background:rgba(255,255,255,.08); border:1px solid rgba(255,215,0,.35);
-    border-radius:20px; padding:7px 20px; font-weight:700; margin-bottom:18px; font-size:14px; }
-  .coins-box span { color:#ffd700; }
-  .wheel-wrap { position:relative; width:290px; height:290px; margin-bottom:22px; }
-  .pointer { position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:0; height:0;
-    border-left:13px solid transparent; border-right:13px solid transparent; border-top:22px solid #ffd700;
-    z-index:6; filter:drop-shadow(0 3px 6px rgba(0,0,0,.5)); }
-  .wheel {
-    width:100%; height:100%; border-radius:50%;
-    border:6px solid #ffd700;
-    box-shadow:0 0 40px rgba(255,215,0,.35), 0 0 90px rgba(138,43,226,.25), inset 0 0 30px rgba(0,0,0,.35);
-    position:relative; overflow:hidden;
-    transition:transform 5s cubic-bezier(.17,.67,.21,.99);
-  }
-  .seg-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
-  .seg-label span { display:block; font-weight:800; font-size:15px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6); }
-  .hub { position:absolute; left:50%; top:50%; width:54px; height:54px; transform:translate(-50%,-50%);
-    background:radial-gradient(circle at 35% 30%, #ffe28a, #d4a017); border-radius:50%;
-    display:flex; align-items:center; justify-content:center; font-size:24px;
-    box-shadow:0 0 20px rgba(255,215,0,.8); z-index:5; }
-  .spin-btn { background:linear-gradient(135deg,#8b3dff,#6a1bb8); border:2px solid #b47aff; color:#fff;
+  .sub { font-size:12px; color:#b8a5d9; margin:4px 0 12px; }
+  .coins { background:rgba(255,255,255,.08); border:1px solid rgba(255,215,0,.35); border-radius:20px;
+    padding:7px 20px; font-weight:700; margin-bottom:14px; font-size:14px; }
+  .coins span { color:#ffd700; }
+  .case-emoji { font-size:60px; margin-bottom:8px; filter:drop-shadow(0 6px 18px rgba(255,215,0,.4)); }
+  .reel-box { position:relative; width:100%; max-width:420px; height:150px; overflow:hidden;
+    background:rgba(0,0,0,.4); border-radius:12px; margin-bottom:14px;
+    box-shadow:inset 0 0 30px rgba(0,0,0,.6); }
+  .marker { position:absolute; top:0; left:50%; width:3px; height:100%; background:#ffd700;
+    transform:translateX(-50%); z-index:5; box-shadow:0 0 12px rgba(255,215,0,.8); }
+  .strip { display:flex; align-items:center; height:100%; will-change:transform; }
+  .card { flex:0 0 110px; height:120px; margin:0 5px; border-radius:10px; background:#1e1433;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    border:2px solid; position:relative; overflow:hidden; }
+  .card .em { font-size:38px; }
+  .card .nm { font-size:11px; font-weight:700; text-align:center; padding:0 4px; }
+  .card .rar { position:absolute; bottom:0; left:0; right:0; height:5px; }
+  .open-btn { background:linear-gradient(135deg,#8b3dff,#6a1bb8); border:2px solid #b47aff; color:#fff;
     font-size:17px; font-weight:800; letter-spacing:1px; padding:14px 52px; border-radius:28px; cursor:pointer;
     box-shadow:0 8px 26px rgba(138,43,226,.5); transition:transform .1s; }
-  .spin-btn:active { transform:scale(.96); }
-  .spin-btn:disabled { opacity:.5; cursor:not-allowed; }
-  .legend { margin-top:18px; width:100%; max-width:340px; background:rgba(255,255,255,.06);
+  .open-btn:active { transform:scale(.96); }
+  .open-btn:disabled { opacity:.5; cursor:not-allowed; }
+  .legend { margin-top:16px; width:100%; max-width:420px; background:rgba(255,255,255,.06);
     border-radius:16px; padding:12px 14px; max-height:150px; overflow-y:auto; }
   .legend-item { display:flex; align-items:center; gap:8px; padding:3px 0; font-size:12px; }
   .dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(8px);
     display:none; align-items:center; justify-content:center; z-index:50; }
   .overlay.show { display:flex; animation:fade .25s; }
-  .result-box { background:linear-gradient(135deg,#2d1b4e,#1a0b2e); border:2px solid #ffd700; border-radius:24px;
-    padding:26px 24px; text-align:center; max-width:290px; animation:pop .35s cubic-bezier(.18,.89,.32,1.28); }
-  .result-emoji { font-size:58px; margin-bottom:10px; }
+  .result-box { background:linear-gradient(135deg,#2d1b4e,#12081f); border:2px solid #ffd700; border-radius:24px;
+    padding:26px 24px; text-align:center; max-width:300px; animation:pop .35s cubic-bezier(.18,.89,.32,1.28); }
+  .result-emoji { font-size:60px; margin-bottom:10px; }
   .result-title { font-size:20px; font-weight:800; margin-bottom:6px; }
+  .result-rar { font-size:13px; font-weight:700; margin-bottom:6px; }
   .result-text { font-size:12px; color:#b8a5d9; line-height:1.5; margin-bottom:14px; }
-  .close-btn { background:#ffd700; color:#1a0b2e; border:none; padding:11px 32px; border-radius:20px; font-weight:800; font-size:15px; cursor:pointer; }
+  .close-btn { background:#ffd700; color:#12081f; border:none; padding:11px 32px; border-radius:20px; font-weight:800; font-size:15px; cursor:pointer; }
   @keyframes fade { from{opacity:0} to{opacity:1} }
   @keyframes pop { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
 </style>
 </head>
 <body>
-  <h1>🎰 МЕМТОП РУЛЕТКА</h1>
-  <div class="subtitle">Испытай свою удачу</div>
-  <div class="coins-box">🪙 Топикоинов: <span id="coins">0</span></div>
+  <h1>🎰 МЕМТОП КЕЙС</h1>
+  <div class="sub">Открытие как в CS2</div>
+  <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
+  <div class="case-emoji">🧰</div>
 
-  <div class="wheel-wrap">
-    <div class="pointer"></div>
-    <div class="wheel" id="wheel">
-      <div class="hub">💎</div>
-    </div>
+  <div class="reel-box">
+    <div class="marker"></div>
+    <div class="strip" id="strip"></div>
   </div>
 
-  <button class="spin-btn" id="spinBtn">КРУТИТЬ</button>
-
+  <button class="open-btn" id="openBtn">ОТКРЫТЬ КЕЙС</button>
   <div class="legend" id="legend"></div>
 
   <div class="overlay" id="overlay">
     <div class="result-box">
       <div class="result-emoji" id="rEmoji">🎉</div>
       <div class="result-title" id="rTitle"></div>
+      <div class="result-rar" id="rRar"></div>
       <div class="result-text" id="rText"></div>
-      <button class="close-btn" id="closeBtn">КРУТИТЬ ЕЩЁ</button>
+      <button class="close-btn" id="closeBtn">ОТКРЫТЬ ЕЩЁ</button>
     </div>
   </div>
 
@@ -95,124 +91,101 @@ try {
     if (m2) userCoins = parseInt(m2[1], 10) || 0;
   }
 } catch(e) {}
-const coinsEl = document.getElementById('coins');
-coinsEl.textContent = userCoins;
+document.getElementById('coins').textContent = userCoins;
 
-/* Сектора: prob = реальный шанс, vis = визуальный угол (для красоты) */
-const SECTORS = [
-  {t:'coin',        prob:1,  vis:20,  label:'🪙', color:'#ffd700', txt:'#1a0b2e'},
-  {t:'ban',         prob:9,  vis:40,  label:'БАН', color:'#ff4757'},
-  {t:'tag_lucky',   prob:5,  vis:15,  label:'🍀', color:'#3742fa'},
-  {t:'tag_joker',   prob:5,  vis:15,  label:'🃏', color:'#9b59b6'},
-  {t:'tag_memolog', prob:5,  vis:15,  label:'🎭', color:'#e67e22'},
-  {t:'tag_vip',     prob:5,  vis:15,  label:'💎', color:'#1abc9c'},
-  {t:'tag_pepe',    prob:5,  vis:15,  label:'🐸', color:'#2ecc71'},
-  {t:'tag_tsar',    prob:5,  vis:15,  label:'👑', color:'#f1c40f'},
-  {t:'tag_syrok',   prob:5,  vis:15,  label:'🧀', color:'#f39c12'},
-  {t:'tag_medved',  prob:5,  vis:15,  label:'🐻', color:'#8b4513'},
-  {t:'tag_temny',   prob:5,  vis:15,  label:'🌚', color:'#34495e'},
-  {t:'tag_turbo',   prob:5,  vis:15,  label:'🐢', color:'#16a085'},
-  {t:'tag_obereg',  prob:5,  vis:15,  label:'🧿', color:'#2980b9'},
-  {t:'tag_skuf',    prob:5,  vis:15,  label:'🐍', color:'#27ae60'},
-  {t:'tag_dino',    prob:5,  vis:15,  label:'🦖', color:'#7f8c8d'},
-  {t:'tag_pchela',  prob:5,  vis:15,  label:'🐝', color:'#f5b041'},
-  {t:'nothing',     prob:20, vis:90,  label:'Пусто', color:'#555'},
+const RAR_COLOR = { gold:'#ffd700', legendary:'#eb4b4b', rare:'#8847ff', common:'#4b69ff', ban:'#555555', none:'#333333' };
+const RAR_LABEL = { gold:'🌟 Золотой', legendary:'🔴 Легендарный', rare:'🟣 Редкий', common:'🔵 Обычный', ban:'⚫ Штраф', none:'⚪ Пусто' };
+
+// Шансы: топкоин 2%, бан 10%, теги по редкости, пусто 49%
+const ITEMS = [
+  { t:'coin',       em:'🪙', nm:'10 Топикоинов', rar:'gold',      ch:2 },
+  { t:'ban',        em:'🚫', nm:'Бан 5 часов',   rar:'ban',       ch:10 },
+  { t:'tag_vip',    em:'💎', nm:'VIP',           rar:'legendary', ch:3 },
+  { t:'tag_pepe',   em:'🐸', nm:'Пепе',          rar:'rare',      ch:4 },
+  { t:'tag_joker',  em:'🃏', nm:'Джокер',        rar:'rare',      ch:4 },
+  { t:'tag_dino',   em:'🦖', nm:'Дино',          rar:'rare',      ch:4 },
+  { t:'tag_obereg', em:'🧿', nm:'Оберег',        rar:'rare',      ch:4 },
+  { t:'tag_lucky',  em:'🍀', nm:'Счастливчик',   rar:'common',    ch:5 },
+  { t:'tag_syrok',  em:'🧀', nm:'Сырок',         rar:'common',    ch:5 },
+  { t:'tag_medved', em:'🐻', nm:'Медведь',       rar:'common',    ch:5 },
+  { t:'tag_temny',  em:'🌚', nm:'Тёмный',        rar:'common',    ch:5 },
+  { t:'tag_turbo',  em:'🐢', nm:'Турбо',         rar:'common',    ch:5 },
+  { t:'tag_pchela', em:'🐝', nm:'Пчела',         rar:'common',    ch:5 },
+  { t:'nothing',    em:'💨', nm:'Пусто',         rar:'none',      ch:49 },
 ];
 
-const wheel = document.getElementById('wheel');
-const spinBtn = document.getElementById('spinBtn');
-const overlay = document.getElementById('overlay');
-
-/* Рисуем колесо + метки */
-let acc = 0, stops = [], centers = [];
-SECTORS.forEach(s => {
-  stops.push(s.color + ' ' + acc + 'deg ' + (acc + s.vis) + 'deg');
-  centers.push(acc + s.vis / 2);
-  acc += s.vis;
-});
-wheel.style.background = 'conic-gradient(' + stops.join(',') + ')';
-SECTORS.forEach((s, i) => {
-  const c = centers[i];
-  const d = document.createElement('div');
-  d.className = 'seg-label';
-  d.style.transform = 'rotate(' + c + 'deg)';
-  d.innerHTML = '<span style="transform: translateY(-100px) rotate(' + (-c) + 'deg);' +
-                (s.txt ? ('color:' + s.txt + ';text-shadow:none;') : '') + '">' + s.label + '</span>';
-  wheel.appendChild(d);
-});
-
-/* Легенда */
-const legend = document.getElementById('legend');
-SECTORS.forEach(s => {
-  const div = document.createElement('div');
-  div.className = 'legend-item';
-  div.innerHTML = '<div class="dot" style="background:' + s.color + '"></div><b>' + s.prob + '%</b> — ' +
-    (s.t === 'coin' ? '10 Топикоинов 🪙' :
-     s.t === 'ban' ? 'Бан на 5 часов' :
-     s.t === 'nothing' ? 'Ничего' : 'Тег ' + s.label);
-  legend.appendChild(div);
-});
-
-/* Roll по реальным шансам */
 function roll() {
-  const r = Math.random() * 100;
-  let acc = 0;
-  for (let i = 0; i < SECTORS.length; i++) {
-    acc += SECTORS[i].prob;
-    if (r < acc) return i;
-  }
-  return SECTORS.length - 1;
+  const r = Math.random() * 100; let acc = 0;
+  for (const it of ITEMS) { acc += it.ch; if (r < acc) return it; }
+  return ITEMS[ITEMS.length - 1];
+}
+function fillIndex() {
+  const pool = []; ITEMS.forEach((it, idx) => { for (let k = 0; k < it.ch; k++) pool.push(idx); });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function makeCard(it) {
+  const c = document.createElement('div');
+  c.className = 'card'; c.style.borderColor = RAR_COLOR[it.rar];
+  c.innerHTML = '<div class="em">' + it.em + '</div><div class="nm">' + it.nm + '</div>' +
+                '<div class="rar" style="background:' + RAR_COLOR[it.rar] + '"></div>';
+  return c;
 }
 
-let rot = 0, spinning = false;
+const strip = document.getElementById('strip');
+const openBtn = document.getElementById('openBtn');
+const overlay = document.getElementById('overlay');
+const CARD_W = 120, REEL_LEN = 60, WIN_INDEX = 50;
+let spinning = false;
 
-spinBtn.addEventListener('click', () => {
+function buildStrip(winner) {
+  strip.innerHTML = '';
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateX(0)';
+  for (let i = 0; i < REEL_LEN; i++) strip.appendChild(makeCard(i === WIN_INDEX ? winner : ITEMS[fillIndex()]));
+}
+
+openBtn.addEventListener('click', () => {
   if (spinning) return;
-  spinning = true; spinBtn.disabled = true;
+  spinning = true; openBtn.disabled = true; overlay.classList.remove('show');
   if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-  const idx = roll();
-  const s = SECTORS[idx];
-  const jitter = (Math.random() * 2 - 1) * Math.max(1, s.vis / 2 - 2);
-  const target = centers[idx] + jitter;
-  const turns = 5 + Math.floor(Math.random() * 3);
-  rot += turns * 360 + ((360 - target) - (rot % 360));
-  wheel.style.transform = 'rotate(' + rot + 'deg)';
-
-  setTimeout(() => { showResult(idx); spinning = false; spinBtn.disabled = false; }, 5200);
+  const winner = roll();
+  buildStrip(winner);
+  void strip.offsetWidth;
+  const boxW = document.querySelector('.reel-box').offsetWidth;
+  const jitter = (Math.random() * 2 - 1) * (CARD_W / 2 - 12);
+  const target = WIN_INDEX * CARD_W + CARD_W / 2 - boxW / 2 + jitter;
+  strip.style.transition = 'transform 6s cubic-bezier(0.12, 0.8, 0.24, 1)';
+  strip.style.transform = 'translateX(' + (-target) + 'px)';
+  setTimeout(() => { showResult(winner); spinning = false; openBtn.disabled = false; }, 6200);
 });
 
-function showResult(idx) {
-  const s = SECTORS[idx];
-  const e = document.getElementById('rEmoji');
-  const t = document.getElementById('rTitle');
+function showResult(it) {
+  document.getElementById('rEmoji').textContent = it.em;
+  document.getElementById('rTitle').textContent = it.nm;
+  const r = document.getElementById('rRar');
+  r.textContent = RAR_LABEL[it.rar]; r.style.color = RAR_COLOR[it.rar];
   const x = document.getElementById('rText');
-
-  if (s.t === 'coin') {
-    e.textContent = '🪙'; t.textContent = 'ТОПИКОИНЫ!'; t.style.color = '#ffd700';
-    x.textContent = '+10 Топикоинов! Крути ещё!';
-    userCoins += 10; coinsEl.textContent = userCoins;
+  if (it.t === 'coin') { userCoins += 10; document.getElementById('coins').textContent = userCoins;
+    x.textContent = '+10 Топикоинов! Владельцы уже в курсе!';
     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  } else if (s.t === 'ban') {
-    e.textContent = '🚫'; t.textContent = 'БАН!'; t.style.color = '#ff4757';
-    x.textContent = 'Бан на 5 часов. Отдохни!';
+  } else if (it.t === 'ban') { x.textContent = 'Бан на 5 часов. Отдохни!';
     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-  } else if (s.t === 'nothing') {
-    e.textContent = '💨'; t.textContent = 'ПУСТО...'; t.style.color = '#888';
-    x.textContent = 'Ничего не выпало. Крути ещё!';
+  } else if (it.t === 'nothing') { x.textContent = 'Ничего не выпало. Попробуй ещё!';
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-  } else {
-    e.textContent = s.label; t.textContent = 'ТЕГ ПОЛУЧЕН!'; t.style.color = '#ffd700';
-    x.textContent = 'Теперь у тебя тег ' + s.label + '!';
-    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  }
+  } else { x.textContent = 'Тег теперь рядом с твоим именем!';
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); }
   overlay.classList.add('show');
-  if (tg) { try { tg.sendData(JSON.stringify({ type: s.t })); } catch(e) {} }
+  if (tg) { try { tg.sendData(JSON.stringify({ type: it.t })); } catch(e) {} }
 }
 
-/* Кнопка НЕ закрывает приложение — просто убирает окошко */
-document.getElementById('closeBtn').addEventListener('click', () => {
-  overlay.classList.remove('show');
+document.getElementById('closeBtn').addEventListener('click', () => overlay.classList.remove('show'));
+
+const legend = document.getElementById('legend');
+[...ITEMS].sort((a,b)=>b.ch-a.ch).forEach(it => {
+  const d = document.createElement('div'); d.className = 'legend-item';
+  d.innerHTML = '<div class="dot" style="background:' + RAR_COLOR[it.rar] + '"></div><b>' + it.ch + '%</b> — ' +
+    it.em + ' ' + it.nm + ' <span style="color:' + RAR_COLOR[it.rar] + '">(' + RAR_LABEL[it.rar] + ')</span>';
+  legend.appendChild(d);
 });
 </script>
 </body>
