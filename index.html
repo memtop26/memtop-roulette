@@ -6,186 +6,137 @@
 <title>МЕМТОП Кейс</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body {
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    background:radial-gradient(circle at 50% 20%, #2d1b4e 0%, #12081f 70%);
-    color:#fff; min-height:100vh; user-select:none; overflow-x:hidden;
-    display:flex; flex-direction:column; align-items:center; padding:20px 0;
-  }
-  h1 { font-size:22px; font-weight:800; color:#ffd700; text-shadow:0 2px 12px rgba(255,215,0,.35); }
-  .sub { font-size:12px; color:#b8a5d9; margin:4px 0 12px; }
-  .coins { background:rgba(255,255,255,.08); border:1px solid rgba(255,215,0,.35); border-radius:20px;
-    padding:7px 20px; font-weight:700; margin-bottom:14px; font-size:14px; }
-  .coins span { color:#ffd700; }
-  .case-emoji { font-size:60px; margin-bottom:8px; filter:drop-shadow(0 6px 18px rgba(255,215,0,.4)); }
-  .reel-box { position:relative; width:100%; max-width:420px; height:150px; overflow:hidden;
-    background:rgba(0,0,0,.4); border-radius:12px; margin-bottom:14px;
-    box-shadow:inset 0 0 30px rgba(0,0,0,.6); }
-  .marker { position:absolute; top:0; left:50%; width:3px; height:100%; background:#ffd700;
-    transform:translateX(-50%); z-index:5; box-shadow:0 0 12px rgba(255,215,0,.8); }
-  .strip { display:flex; align-items:center; height:100%; will-change:transform; }
-  .card { flex:0 0 110px; height:120px; margin:0 5px; border-radius:10px; background:#1e1433;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
-    border:2px solid; position:relative; overflow:hidden; }
-  .card .em { font-size:38px; }
-  .card .nm { font-size:11px; font-weight:700; text-align:center; padding:0 4px; }
-  .card .rar { position:absolute; bottom:0; left:0; right:0; height:5px; }
-  .open-btn { background:linear-gradient(135deg,#8b3dff,#6a1bb8); border:2px solid #b47aff; color:#fff;
-    font-size:17px; font-weight:800; letter-spacing:1px; padding:14px 52px; border-radius:28px; cursor:pointer;
-    box-shadow:0 8px 26px rgba(138,43,226,.5); transition:transform .1s; }
-  .open-btn:active { transform:scale(.96); }
-  .open-btn:disabled { opacity:.5; cursor:not-allowed; }
-  .legend { margin-top:16px; width:100%; max-width:420px; background:rgba(255,255,255,.06);
-    border-radius:16px; padding:12px 14px; max-height:150px; overflow-y:auto; }
-  .legend-item { display:flex; align-items:center; gap:8px; padding:3px 0; font-size:12px; }
-  .dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
-  .overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(8px);
-    display:none; align-items:center; justify-content:center; z-index:50; }
-  .overlay.show { display:flex; animation:fade .25s; }
-  .result-box { background:linear-gradient(135deg,#2d1b4e,#12081f); border:2px solid #ffd700; border-radius:24px;
-    padding:26px 24px; text-align:center; max-width:300px; animation:pop .35s cubic-bezier(.18,.89,.32,1.28); }
-  .result-emoji { font-size:60px; margin-bottom:10px; }
-  .result-title { font-size:20px; font-weight:800; margin-bottom:6px; }
-  .result-rar { font-size:13px; font-weight:700; margin-bottom:6px; }
-  .result-text { font-size:12px; color:#b8a5d9; line-height:1.5; margin-bottom:14px; }
-  .close-btn { background:#ffd700; color:#12081f; border:none; padding:11px 32px; border-radius:20px; font-weight:800; font-size:15px; cursor:pointer; }
-  @keyframes fade { from{opacity:0} to{opacity:1} }
-  @keyframes pop { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:radial-gradient(circle at 50% 20%,#2d1b4e 0%,#12081f 70%);color:#fff;min-height:100vh;user-select:none;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;padding:20px 0}
+h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 12px rgba(255,215,0,.35)}
+.sub{font-size:12px;color:#b8a5d9;margin:4px 0 12px}
+.coins{background:rgba(255,255,255,.08);border:1px solid rgba(255,215,0,.35);border-radius:20px;padding:7px 20px;font-weight:700;margin-bottom:14px;font-size:14px}
+.coins span{color:#ffd700}
+.case{font-size:56px;margin-bottom:8px;filter:drop-shadow(0 6px 18px rgba(255,215,0,.4))}
+.reel-box{position:relative;width:100%;max-width:420px;height:150px;overflow:hidden;background:rgba(0,0,0,.4);border-radius:12px;margin-bottom:14px;box-shadow:inset 0 0 30px rgba(0,0,0,.6)}
+.marker{position:absolute;top:0;left:50%;width:3px;height:100%;background:#ffd700;transform:translateX(-50%);z-index:5;box-shadow:0 0 12px rgba(255,215,0,.8)}
+.strip{display:flex;align-items:center;height:100%;will-change:transform}
+.card{flex:0 0 110px;height:120px;margin:0 5px;border-radius:10px;background:#1e1433;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:2px solid;position:relative;overflow:hidden}
+.card .em{font-size:38px}
+.card .nm{font-size:11px;font-weight:700;text-align:center;padding:0 4px}
+.card .rar{position:absolute;bottom:0;left:0;right:0;height:5px}
+.open-btn{background:linear-gradient(135deg,#8b3dff,#6a1bb8);border:2px solid #b47aff;color:#fff;font-size:17px;font-weight:800;letter-spacing:1px;padding:14px 52px;border-radius:28px;cursor:pointer;box-shadow:0 8px 26px rgba(138,43,226,.5);transition:transform .1s}
+.open-btn:active{transform:scale(.96)}
+.open-btn:disabled{opacity:.5;cursor:not-allowed}
+.legend{margin-top:16px;width:100%;max-width:420px;background:rgba(255,255,255,.06);border-radius:16px;padding:12px 14px;max-height:170px;overflow-y:auto}
+.legend-item{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px}
+.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50}
+.overlay.show{display:flex;animation:fade .25s}
+.result-box{background:linear-gradient(135deg,#2d1b4e,#12081f);border:2px solid #ffd700;border-radius:24px;padding:26px 24px;text-align:center;max-width:300px;animation:pop .35s cubic-bezier(.18,.89,.32,1.28)}
+.result-emoji{font-size:60px;margin-bottom:10px}
+.result-title{font-size:20px;font-weight:800;margin-bottom:6px}
+.result-rar{font-size:13px;font-weight:700;margin-bottom:6px}
+.result-text{font-size:12px;color:#b8a5d9;line-height:1.5;margin-bottom:14px}
+.close-btn{background:#ffd700;color:#12081f;border:none;padding:11px 32px;border-radius:20px;font-weight:800;font-size:15px;cursor:pointer}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
-  <h1>🎰 МЕМТОП КЕЙС</h1>
-  <div class="sub">Открытие как в CS2</div>
-  <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
-  <div class="case-emoji">🧰</div>
-
-  <div class="reel-box">
-    <div class="marker"></div>
-    <div class="strip" id="strip"></div>
+<h1>🎰 МЕМТОП КЕЙС</h1>
+<div class="sub">Открытие как в CS2 · шансы повышены!</div>
+<div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
+<div class="case">🧰</div>
+<div class="reel-box"><div class="marker"></div><div class="strip" id="strip"></div></div>
+<button class="open-btn" id="openBtn">ОТКРЫТЬ КЕЙС</button>
+<div class="legend" id="legend"></div>
+<div class="overlay" id="overlay">
+  <div class="result-box">
+    <div class="result-emoji" id="rEmoji">🎉</div>
+    <div class="result-title" id="rTitle"></div>
+    <div class="result-rar" id="rRar"></div>
+    <div class="result-text" id="rText"></div>
+    <button class="close-btn" id="closeBtn">ОТКРЫТЬ ЕЩЁ</button>
   </div>
-
-  <button class="open-btn" id="openBtn">ОТКРЫТЬ КЕЙС</button>
-  <div class="legend" id="legend"></div>
-
-  <div class="overlay" id="overlay">
-    <div class="result-box">
-      <div class="result-emoji" id="rEmoji">🎉</div>
-      <div class="result-title" id="rTitle"></div>
-      <div class="result-rar" id="rRar"></div>
-      <div class="result-text" id="rText"></div>
-      <button class="close-btn" id="closeBtn">ОТКРЫТЬ ЕЩЁ</button>
-    </div>
-  </div>
-
+</div>
 <script>
-const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-if (tg) { tg.ready(); tg.expand(); }
-
-let userCoins = 0;
-try {
-  const sp = new URLSearchParams(location.search);
-  userCoins = parseInt(sp.get('c') || '0', 10) || 0;
-  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-    const m2 = String(tg.initDataUnsafe.start_param).match(/c=(\d+)/);
-    if (m2) userCoins = parseInt(m2[1], 10) || 0;
+const tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;
+if(tg){tg.ready();tg.expand();}
+let userCoins=0;
+try{
+  const sp=new URLSearchParams(location.search);
+  userCoins=parseInt(sp.get('c')||'0',10)||0;
+  if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.start_param){
+    const m2=String(tg.initDataUnsafe.start_param).match(/c=(\d+)/);
+    if(m2)userCoins=parseInt(m2[1],10)||0;
   }
-} catch(e) {}
-document.getElementById('coins').textContent = userCoins;
+}catch(e){}
+document.getElementById('coins').textContent=userCoins;
 
-const RAR_COLOR = { gold:'#ffd700', legendary:'#eb4b4b', rare:'#8847ff', common:'#4b69ff', ban:'#555555', none:'#333333' };
-const RAR_LABEL = { gold:'🌟 Золотой', legendary:'🔴 Легендарный', rare:'🟣 Редкий', common:'🔵 Обычный', ban:'⚫ Штраф', none:'⚪ Пусто' };
+const RAR_COLOR={gold:'#ffd700',legendary:'#eb4b4b',rare:'#8847ff',common:'#4b69ff',ban:'#555555',none:'#333333'};
+const RAR_LABEL={gold:'🌟 Золотой',legendary:'🔴 Легендарный',rare:'🟣 Редкий',common:'🔵 Обычный',ban:'⚫ Штраф',none:'⚪ Пусто'};
 
-// Шансы: топкоин 2%, бан 10%, теги по редкости, пусто 49%
-const ITEMS = [
-  { t:'coin',       em:'🪙', nm:'10 Топикоинов', rar:'gold',      ch:2 },
-  { t:'ban',        em:'🚫', nm:'Бан 5 часов',   rar:'ban',       ch:10 },
-  { t:'tag_vip',    em:'💎', nm:'VIP',           rar:'legendary', ch:3 },
-  { t:'tag_pepe',   em:'🐸', nm:'Пепе',          rar:'rare',      ch:4 },
-  { t:'tag_joker',  em:'🃏', nm:'Джокер',        rar:'rare',      ch:4 },
-  { t:'tag_dino',   em:'🦖', nm:'Дино',          rar:'rare',      ch:4 },
-  { t:'tag_obereg', em:'🧿', nm:'Оберег',        rar:'rare',      ch:4 },
-  { t:'tag_lucky',  em:'🍀', nm:'Счастливчик',   rar:'common',    ch:5 },
-  { t:'tag_syrok',  em:'🧀', nm:'Сырок',         rar:'common',    ch:5 },
-  { t:'tag_medved', em:'🐻', nm:'Медведь',       rar:'common',    ch:5 },
-  { t:'tag_temny',  em:'🌚', nm:'Тёмный',        rar:'common',    ch:5 },
-  { t:'tag_turbo',  em:'🐢', nm:'Турбо',         rar:'common',    ch:5 },
-  { t:'tag_pchela', em:'🐝', nm:'Пчела',         rar:'common',    ch:5 },
-  { t:'nothing',    em:'💨', nm:'Пусто',         rar:'none',      ch:49 },
+/* ШАНСЫ ПОВЫШЕНЫ: монеты 5%, бан всего 5%, теги чаще, пусто всего 15% */
+const ITEMS=[
+ {t:'coin',      em:'🪙',nm:'10 Топикоинов',rar:'gold',     ch:5},
+ {t:'ban',       em:'🚫',nm:'Бан 5 часов',  rar:'ban',      ch:5},
+ {t:'tag_vip',   em:'💎',nm:'VIP',          rar:'legendary',ch:5},
+ {t:'tag_pepe',  em:'🐸',nm:'Пепе',         rar:'rare',     ch:8},
+ {t:'tag_joker', em:'🃏',nm:'Джокер',       rar:'rare',     ch:8},
+ {t:'tag_dino',  em:'🦖',nm:'Дино',         rar:'rare',     ch:8},
+ {t:'tag_obereg',em:'🧿',nm:'Оберег',       rar:'rare',     ch:8},
+ {t:'tag_lucky', em:'🍀',nm:'Счастливчик',  rar:'common',   ch:6},
+ {t:'tag_syrok', em:'🧀',nm:'Сырок',        rar:'common',   ch:6},
+ {t:'tag_medved',em:'🐻',nm:'Медведь',      rar:'common',   ch:6},
+ {t:'tag_temny', em:'🌚',nm:'Тёмный',       rar:'common',   ch:6},
+ {t:'tag_turbo', em:'🐢',nm:'Турбо',        rar:'common',   ch:6},
+ {t:'tag_pchela',em:'🐝',nm:'Пчела',        rar:'common',   ch:6},
+ {t:'nothing',   em:'💨',nm:'Пусто',        rar:'none',     ch:15},
 ];
 
-function roll() {
-  const r = Math.random() * 100; let acc = 0;
-  for (const it of ITEMS) { acc += it.ch; if (r < acc) return it; }
-  return ITEMS[ITEMS.length - 1];
-}
-function fillIndex() {
-  const pool = []; ITEMS.forEach((it, idx) => { for (let k = 0; k < it.ch; k++) pool.push(idx); });
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-function makeCard(it) {
-  const c = document.createElement('div');
-  c.className = 'card'; c.style.borderColor = RAR_COLOR[it.rar];
-  c.innerHTML = '<div class="em">' + it.em + '</div><div class="nm">' + it.nm + '</div>' +
-                '<div class="rar" style="background:' + RAR_COLOR[it.rar] + '"></div>';
-  return c;
-}
+function roll(){const r=Math.random()*100;let a=0;for(const it of ITEMS){a+=it.ch;if(r<a)return it;}return ITEMS[ITEMS.length-1];}
+function fillIndex(){const pool=[];ITEMS.forEach((it,i)=>{for(let k=0;k<it.ch;k++)pool.push(i);});return pool[Math.floor(Math.random()*pool.length)];}
+function makeCard(it){const c=document.createElement('div');c.className='card';c.style.borderColor=RAR_COLOR[it.rar];
+ c.innerHTML='<div class="em">'+it.em+'</div><div class="nm">'+it.nm+'</div><div class="rar" style="background:'+RAR_COLOR[it.rar]+'"></div>';return c;}
 
-const strip = document.getElementById('strip');
-const openBtn = document.getElementById('openBtn');
-const overlay = document.getElementById('overlay');
-const CARD_W = 120, REEL_LEN = 60, WIN_INDEX = 50;
-let spinning = false;
+const strip=document.getElementById('strip'),openBtn=document.getElementById('openBtn'),overlay=document.getElementById('overlay');
+const CARD_W=120,REEL_LEN=60,WIN_INDEX=50;let spinning=false;
 
-function buildStrip(winner) {
-  strip.innerHTML = '';
-  strip.style.transition = 'none';
-  strip.style.transform = 'translateX(0)';
-  for (let i = 0; i < REEL_LEN; i++) strip.appendChild(makeCard(i === WIN_INDEX ? winner : ITEMS[fillIndex()]));
-}
-
-openBtn.addEventListener('click', () => {
-  if (spinning) return;
-  spinning = true; openBtn.disabled = true; overlay.classList.remove('show');
-  if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-  const winner = roll();
-  buildStrip(winner);
-  void strip.offsetWidth;
-  const boxW = document.querySelector('.reel-box').offsetWidth;
-  const jitter = (Math.random() * 2 - 1) * (CARD_W / 2 - 12);
-  const target = WIN_INDEX * CARD_W + CARD_W / 2 - boxW / 2 + jitter;
-  strip.style.transition = 'transform 6s cubic-bezier(0.12, 0.8, 0.24, 1)';
-  strip.style.transform = 'translateX(' + (-target) + 'px)';
-  setTimeout(() => { showResult(winner); spinning = false; openBtn.disabled = false; }, 6200);
+openBtn.addEventListener('click',()=>{
+ if(spinning)return;spinning=true;openBtn.disabled=true;overlay.classList.remove('show');
+ if(tg&&tg.HapticFeedback)tg.HapticFeedback.impactOccurred('medium');
+ const winner=roll();
+ strip.innerHTML='';strip.style.transition='none';strip.style.transform='translateX(0)';
+ for(let i=0;i<REEL_LEN;i++)strip.appendChild(makeCard(i===WIN_INDEX?winner:ITEMS[fillIndex()]));
+ void strip.offsetWidth;
+ const boxW=document.querySelector('.reel-box').offsetWidth;
+ const jitter=(Math.random()*2-1)*(CARD_W/2-12);
+ const target=WIN_INDEX*CARD_W+CARD_W/2-boxW/2+jitter;
+ strip.style.transition='transform 6s cubic-bezier(0.12,0.8,0.24,1)';
+ strip.style.transform='translateX('+(-target)+'px)';
+ setTimeout(()=>{showResult(winner);spinning=false;openBtn.disabled=false;},6200);
 });
 
-function showResult(it) {
-  document.getElementById('rEmoji').textContent = it.em;
-  document.getElementById('rTitle').textContent = it.nm;
-  const r = document.getElementById('rRar');
-  r.textContent = RAR_LABEL[it.rar]; r.style.color = RAR_COLOR[it.rar];
-  const x = document.getElementById('rText');
-  if (it.t === 'coin') { userCoins += 10; document.getElementById('coins').textContent = userCoins;
-    x.textContent = '+10 Топикоинов! Владельцы уже в курсе!';
-    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  } else if (it.t === 'ban') { x.textContent = 'Бан на 5 часов. Отдохни!';
-    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-  } else if (it.t === 'nothing') { x.textContent = 'Ничего не выпало. Попробуй ещё!';
-    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-  } else { x.textContent = 'Тег теперь рядом с твоим именем!';
-    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); }
-  overlay.classList.add('show');
-  if (tg) { try { tg.sendData(JSON.stringify({ type: it.t })); } catch(e) {} }
+function showResult(it){
+ document.getElementById('rEmoji').textContent=it.em;
+ document.getElementById('rTitle').textContent=it.nm;
+ const r=document.getElementById('rRar');r.textContent=RAR_LABEL[it.rar];r.style.color=RAR_COLOR[it.rar];
+ const x=document.getElementById('rText');
+ if(it.t==='coin'){userCoins+=10;document.getElementById('coins').textContent=userCoins;
+   x.textContent='+10 Топикоинов! Владельцы уже в курсе!';
+   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+ }else if(it.t==='ban'){x.textContent='Бан на 5 часов. Отдохни!';
+   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('error');
+ }else if(it.t==='nothing'){x.textContent='Ничего не выпало. Попробуй ещё!';
+   if(tg&&tg.HapticFeedback)tg.HapticFeedback.impactOccurred('light');
+ }else{x.textContent='Тег теперь рядом с твоим именем!';
+   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');}
+ overlay.classList.add('show');
+ if(tg){try{tg.sendData(JSON.stringify({type:it.t}));}catch(e){}}
 }
+document.getElementById('closeBtn').addEventListener('click',()=>overlay.classList.remove('show'));
 
-document.getElementById('closeBtn').addEventListener('click', () => overlay.classList.remove('show'));
-
-const legend = document.getElementById('legend');
-[...ITEMS].sort((a,b)=>b.ch-a.ch).forEach(it => {
-  const d = document.createElement('div'); d.className = 'legend-item';
-  d.innerHTML = '<div class="dot" style="background:' + RAR_COLOR[it.rar] + '"></div><b>' + it.ch + '%</b> — ' +
-    it.em + ' ' + it.nm + ' <span style="color:' + RAR_COLOR[it.rar] + '">(' + RAR_LABEL[it.rar] + ')</span>';
-  legend.appendChild(d);
+const legend=document.getElementById('legend');
+[...ITEMS].sort((a,b)=>b.ch-a.ch).forEach(it=>{
+ const d=document.createElement('div');d.className='legend-item';
+ d.innerHTML='<div class="dot" style="background:'+RAR_COLOR[it.rar]+'"></div><b>'+it.ch+'%</b> — '+it.em+' '+it.nm+' <span style="color:'+RAR_COLOR[it.rar]+'">('+RAR_LABEL[it.rar]+')</span>';
+ legend.appendChild(d);
 });
 </script>
 </body>
