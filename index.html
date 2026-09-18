@@ -40,16 +40,15 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 .result-emoji{font-size:60px;margin-bottom:10px}
 .result-title{font-size:20px;font-weight:800;margin-bottom:6px}
 .result-rar{font-size:13px;font-weight:700;margin-bottom:6px}
-.result-text{font-size:12px;color:#b8a5d9;line-height:1.5;margin-bottom:8px}
-.send-status{font-size:12px;font-weight:700;margin-bottom:12px}
-.send-ok{color:#2ecc71}.send-err{color:#e74c3c}
-.close-btn{background:#ffd700;color:#12081f;border:none;padding:11px 32px;border-radius:20px;font-weight:800;font-size:15px;cursor:pointer}
+.result-text{font-size:12px;color:#b8a5d9;line-height:1.5;margin-bottom:12px}
+.claim-btn{display:block;background:#ffd700;color:#12081f;border:none;padding:12px 30px;border-radius:20px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;margin:0 auto 10px}
+.again-btn{display:block;background:transparent;color:#b8a5d9;border:1px solid #b8a5d9;padding:10px 26px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer;margin:0 auto}
 </style>
 </head>
 <body>
 <h1>🎰 МЕМТОП КЕЙС</h1>
-<div class="sub">Открытие как в CS2 · v11</div>
-<div class="linkwarn" id="linkWarn">⚠️ Рулетка открыта НЕ из бота! Закрой это окно и открой рулетку кнопкой 🎰 РУЛЕТКА внутри бота — иначе результат не дойдёт.</div>
+<div class="sub">Открытие как в CS2 · v12</div>
+<div class="linkwarn" id="linkWarn">⚠️ Рулетка открыта НЕ из бота! Закрой это окно и открой рулетку кнопкой 🎰 РУЛЕТКА внутри бота — иначе приз не забрать.</div>
 <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
 <div class="case" id="case">🧰</div>
 <div class="reel-box"><div class="marker"></div><div class="strip" id="strip"></div></div>
@@ -60,113 +59,115 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
     <div class="result-emoji" id="rEmoji">🎉</div>
     <div class="result-title" id="rTitle"></div>
     <div class="result-rar" id="rRar"></div>
-    <div class="result-text" id="rText"></div>
-    <div class="send-status" id="sendStatus"></div>
-    <button class="close-btn" id="closeBtn">ОТКРЫТЬ ЕЩЁ</button>
+    <div class="result-text" id="rText">Нажми «Забрать приз», чтобы бот начислил награду.</div>
+    <a class="claim-btn" id="claimBtn" href="#">🎁 ЗАБРАТЬ ПРИЗ</a>
+    <button class="again-btn" id="againBtn">Крутить ещё</button>
   </div>
 </div>
 <script>
-const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-let linked = false;
-if (tg) {
-  tg.ready(); tg.expand();
-  linked = !!(tg.initData && tg.initData.length > 0 && tg.initDataUnsafe && tg.initDataUnsafe.user);
-}
-if (!linked) {
-  document.getElementById('linkWarn').style.display = 'block';
-  document.getElementById('openBtn').disabled = true;
-}
+const tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;
+let linked=false;
+if(tg){tg.ready();tg.expand();linked=!!(tg.initData&&tg.initData.length>0&&tg.initDataUnsafe&&tg.initDataUnsafe.user);}
+if(!linked){document.getElementById('linkWarn').style.display='block';document.getElementById('openBtn').disabled=true;}
 
-let userCoins = 0;
-try {
-  const sp = new URLSearchParams(location.search);
-  userCoins = parseInt(sp.get('c') || '0', 10) || 0;
-  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-    const mm = String(tg.initDataUnsafe.start_param).match(/c=(\d+)/);
-    if (mm) userCoins = parseInt(mm[1], 10) || 0;
+const BOT_USERNAME="BetaMemTop26_bot";
+const SECRET="memtop_roulette_secret_2024";
+
+// простой HMAC-подобный хеш (достаточно для защиты от ручного подбора)
+function sign(payload){
+  let h1=0x811c9dc5, h2=0x01000193;
+  const s=SECRET+"|"+payload;
+  for(let i=0;i<s.length;i++){
+    h1^=s.charCodeAt(i); h1=Math.imul(h1,0x01000193)>>>0;
+    h2=(h2*31+s.charCodeAt(i))>>>0;
   }
-} catch(e) {}
-document.getElementById('coins').textContent = userCoins;
+  return (h1.toString(16).padStart(8,'0')+h2.toString(16).padStart(8,'0')).slice(0,10);
+}
+function randNonce(){return Math.random().toString(36).slice(2,10);}
 
-const RAR = {
-  gold:{c:'#ffd700',label:'🌟 Золотой'},
-  legendary:{c:'#eb4b4b',label:'🔴 Легендарный'},
-  rare:{c:'#8847ff',label:'🟣 Редкий'},
-  common:{c:'#4b69ff',label:'🔵 Обычный'},
-  ban:{c:'#555555',label:'⚫ Штраф'}
+let userCoins=0;
+try{
+  const sp=new URLSearchParams(location.search);
+  userCoins=parseInt(sp.get('c')||'0',10)||0;
+}catch(e){}
+document.getElementById('coins').textContent=userCoins;
+
+const RAR={
+ gold:{c:'#ffd700',label:'🌟 Золотой'},
+ legendary:{c:'#eb4b4b',label:'🔴 Легендарный'},
+ rare:{c:'#8847ff',label:'🟣 Редкий'},
+ common:{c:'#4b69ff',label:'🔵 Обычный'},
+ ban:{c:'#555555',label:'⚫ Штраф'}
 };
-const ITEMS = [
-  {t:'coin',      em:'🪙', nm:'10 Топикоинов', rar:'gold',      ch:5},
-  {t:'ban',       em:'🚫', nm:'Бан 5 часов',  rar:'ban',       ch:5},
-  {t:'tag_vip',   em:'💎', nm:'VIP',          rar:'legendary', ch:5},
-  {t:'tag_pepe',  em:'🐸', nm:'Пепе',         rar:'rare',      ch:5},
-  {t:'tag_joker', em:'🃏', nm:'Джокер',       rar:'rare',      ch:5},
-  {t:'tag_dino',  em:'🦖', nm:'Дино',         rar:'rare',      ch:5},
-  {t:'tag_obereg',em:'🧿', nm:'Оберег',       rar:'rare',      ch:5},
-  {t:'tag_lucky', em:'🍀', nm:'Счастливчик',  rar:'common',    ch:5},
-  {t:'tag_syrok', em:'🧀', nm:'Сырок',        rar:'common',    ch:5},
-  {t:'tag_medved',em:'🐻', nm:'Медведь',      rar:'common',    ch:5},
-  {t:'tag_temny', em:'🌚', nm:'Тёмный',       rar:'common',    ch:5},
-  {t:'tag_turbo', em:'🐢', nm:'Турбо',        rar:'common',    ch:5},
-  {t:'tag_pchela',em:'🐝', nm:'Пчела',        rar:'common',    ch:5},
-  {t:'nothing',   em:'💨', nm:'Пусто',        rar:'ban',       ch:35}
+const ITEMS=[
+ {t:'coin',em:'🪙',nm:'10 Топикоинов',rar:'gold',ch:5},
+ {t:'ban',em:'🚫',nm:'Бан 5 часов',rar:'ban',ch:5},
+ {t:'tag_vip',em:'💎',nm:'VIP',rar:'legendary',ch:5},
+ {t:'tag_pepe',em:'🐸',nm:'Пепе',rar:'rare',ch:5},
+ {t:'tag_joker',em:'🃏',nm:'Джокер',rar:'rare',ch:5},
+ {t:'tag_dino',em:'🦖',nm:'Дино',rar:'rare',ch:5},
+ {t:'tag_obereg',em:'🧿',nm:'Оберег',rar:'rare',ch:5},
+ {t:'tag_lucky',em:'🍀',nm:'Счастливчик',rar:'common',ch:5},
+ {t:'tag_syrok',em:'🧀',nm:'Сырок',rar:'common',ch:5},
+ {t:'tag_medved',em:'🐻',nm:'Медведь',rar:'common',ch:5},
+ {t:'tag_temny',em:'🌚',nm:'Тёмный',rar:'common',ch:5},
+ {t:'tag_turbo',em:'🐢',nm:'Турбо',rar:'common',ch:5},
+ {t:'tag_pchela',em:'🐝',nm:'Пчела',rar:'common',ch:5},
+ {t:'nothing',em:'💨',nm:'Пусто',rar:'ban',ch:35}
 ];
-function roll(){ const r=Math.random()*100; let a=0; for(const it of ITEMS){a+=it.ch; if(r<a) return it;} return ITEMS[ITEMS.length-1]; }
-function fillIdx(){ const pool=[]; ITEMS.forEach((it,i)=>{for(let k=0;k<it.ch;k++)pool.push(i);}); return pool[Math.floor(Math.random()*pool.length)]; }
-function makeCard(it){ const c=document.createElement('div'); c.className='card'; c.style.setProperty('--rar',RAR[it.rar].c);
-  c.innerHTML='<div class="em">'+it.em+'</div><div class="nm">'+it.nm+'</div><div class="rar"></div>'; return c; }
+function roll(){const r=Math.random()*100;let a=0;for(const it of ITEMS){a+=it.ch;if(r<a)return it;}return ITEMS[ITEMS.length-1];}
+function fillIdx(){const pool=[];ITEMS.forEach((it,i)=>{for(let k=0;k<it.ch;k++)pool.push(i);});return pool[Math.floor(Math.random()*pool.length)];}
+function makeCard(it){const c=document.createElement('div');c.className='card';c.style.setProperty('--rar',RAR[it.rar].c);
+ c.innerHTML='<div class="em">'+it.em+'</div><div class="nm">'+it.nm+'</div><div class="rar"></div>';return c;}
 
-const strip=document.getElementById('strip'), openBtn=document.getElementById('openBtn'),
-      overlay=document.getElementById('overlay'), caseEl=document.getElementById('case');
-const CARD_W=120, REEL_LEN=60, WIN_INDEX=50;
+const strip=document.getElementById('strip'),openBtn=document.getElementById('openBtn'),
+ overlay=document.getElementById('overlay'),caseEl=document.getElementById('case'),
+ claimBtn=document.getElementById('claimBtn'),againBtn=document.getElementById('againBtn');
+const CARD_W=120,REEL_LEN=60,WIN_INDEX=50;
 let spinning=false;
-for(let i=0;i<REEL_LEN;i++) strip.appendChild(makeCard(ITEMS[fillIdx()]));
+for(let i=0;i<REEL_LEN;i++)strip.appendChild(makeCard(ITEMS[fillIdx()]));
 
 const legend=document.getElementById('legend');
-ITEMS.forEach(it=>{ const d=document.createElement('div'); d.className='legend-item';
-  d.innerHTML='<div class="dot" style="background:'+RAR[it.rar].c+'"></div><b>'+it.ch+'%</b> — '+it.em+' '+it.nm;
-  legend.appendChild(d); });
+ITEMS.forEach(it=>{const d=document.createElement('div');d.className='legend-item';
+ d.innerHTML='<div class="dot" style="background:'+RAR[it.rar].c+'"></div><b>'+it.ch+'%</b> — '+it.em+' '+it.nm;
+ legend.appendChild(d);});
 
-openBtn.addEventListener('click', ()=>{
-  if(spinning || !linked) return; spinning=true; openBtn.disabled=true; overlay.classList.remove('show');
-  if(tg&&tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-  caseEl.classList.add('shaking'); setTimeout(()=>caseEl.classList.remove('shaking'),650);
-  const winner=roll();
-  strip.style.transition='none'; strip.style.transform='translateX(0)'; strip.innerHTML='';
-  for(let i=0;i<REEL_LEN;i++) strip.appendChild(makeCard(i===WIN_INDEX?winner:ITEMS[fillIdx()]));
-  void strip.offsetWidth;
-  const boxW=document.querySelector('.reel-box').offsetWidth;
-  const jitter=(Math.random()*2-1)*(CARD_W/2-14);
-  const target=WIN_INDEX*CARD_W+CARD_W/2-boxW/2+jitter;
-  strip.style.transition='transform 6.5s cubic-bezier(.15,.85,.25,1)';
-  strip.style.transform='translateX('+(-target)+'px)';
-  setTimeout(()=>{
-    strip.style.transition='transform .35s cubic-bezier(.3,1.4,.5,1)';
-    strip.style.transform='translateX('+(-target-10)+'px)';
-    setTimeout(()=>{ strip.style.transition='transform .3s cubic-bezier(.3,1.4,.5,1)'; strip.style.transform='translateX('+(-target)+'px)'; },350);
-    showResult(winner);
-    spinning=false; openBtn.disabled=false;
-  },6500);
+openBtn.addEventListener('click',()=>{
+ if(spinning||!linked)return;spinning=true;openBtn.disabled=true;overlay.classList.remove('show');
+ if(tg&&tg.HapticFeedback)tg.HapticFeedback.impactOccurred('medium');
+ caseEl.classList.add('shaking');setTimeout(()=>caseEl.classList.remove('shaking'),650);
+ const winner=roll();
+ strip.style.transition='none';strip.style.transform='translateX(0)';strip.innerHTML='';
+ for(let i=0;i<REEL_LEN;i++)strip.appendChild(makeCard(i===WIN_INDEX?winner:ITEMS[fillIdx()]));
+ void strip.offsetWidth;
+ const boxW=document.querySelector('.reel-box').offsetWidth;
+ const jitter=(Math.random()*2-1)*(CARD_W/2-14);
+ const target=WIN_INDEX*CARD_W+CARD_W/2-boxW/2+jitter;
+ strip.style.transition='transform 6.5s cubic-bezier(.15,.85,.25,1)';
+ strip.style.transform='translateX('+(-target)+'px)';
+ setTimeout(()=>{
+   strip.style.transition='transform .35s cubic-bezier(.3,1.4,.5,1)';
+   strip.style.transform='translateX('+(-target-10)+'px)';
+   setTimeout(()=>{strip.style.transition='transform .3s cubic-bezier(.3,1.4,.5,1)';strip.style.transform='translateX('+(-target)+'px)';},350);
+   showResult(winner);
+   spinning=false;openBtn.disabled=false;
+ },6500);
 });
 
 function showResult(it){
-  document.getElementById('rEmoji').textContent=it.em;
-  document.getElementById('rTitle').textContent=it.nm;
-  const r=document.getElementById('rRar'); r.textContent=RAR[it.rar].label; r.style.color=RAR[it.rar].c;
-  document.getElementById('rText').textContent = (it.t==='coin') ? '+10 Топикоинов!' :
-      (it.t==='ban') ? 'Бан на 5 часов.' : (it.t==='nothing') ? 'Ничего не выпало.' : 'Тег получен!';
-  const st=document.getElementById('sendStatus');
-  let ok=false, err='';
-  try {
-    if (tg && tg.sendData && linked) { tg.sendData(JSON.stringify({type: it.t})); ok=true; }
-    else err='нет связи с ботом';
-  } catch(e){ err=String(e); }
-  if (ok) { st.textContent='✅ Данные ушли боту — тег/монеты появятся у имени'; st.className='send-status send-ok'; }
-  else { st.textContent='⚠️ Не удалось отправить: '+err; st.className='send-status send-err'; }
-  if(tg&&tg.HapticFeedback) tg.HapticFeedback.notificationOccurred(ok?'success':'error');
-  overlay.classList.add('show');
+ document.getElementById('rEmoji').textContent=it.em;
+ document.getElementById('rTitle').textContent=it.nm;
+ const r=document.getElementById('rRar');r.textContent=RAR[it.rar].label;r.style.color=RAR[it.rar].c;
+ // готовим ссылку-подтверждение для бота
+ const nonce=randNonce();
+ const sig=sign(it.t+"_"+nonce);
+ claimBtn.href="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nonce+"_"+sig;
+ // запасной канал (может не дойти) — не страшно, есть кнопка
+ try{if(tg&&tg.sendData)tg.sendData(JSON.stringify({type:it.t,nonce:nonce,sig:sig}));}catch(e){}
+ if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+ overlay.classList.add('show');
 }
-document.getElementById('closeBtn').addEventListener('click', ()=>overlay.classList.remove('show'));
+againBtn.addEventListener('click',()=>{overlay.classList.remove('show');openBtn.click();});
 </script>
 </body>
 </html>
