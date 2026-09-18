@@ -12,7 +12,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;c
  background:linear-gradient(120deg,#1a0b2e,#2d1b4e,#12081f,#2d1b4e,#1a0b2e);background-size:400% 400%;animation:bg 14s ease infinite}
 @keyframes bg{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,215,0,.45)}
-.sub{font-size:12px;color:#b8a5d9;margin:4px 0 12px}
+.sub{font-size:12px;color:#b8a5d9;margin:4px 0 10px}
+.linkwarn{display:none;width:92%;max-width:420px;background:#5a1a1a;border:1px solid #e74c3c;border-radius:12px;
+ padding:10px;font-size:12px;color:#ffd7d7;margin-bottom:10px;text-align:center}
 .coins{background:rgba(255,255,255,.08);border:1px solid rgba(255,215,0,.35);border-radius:20px;padding:7px 20px;font-weight:700;margin-bottom:14px}
 .coins span{color:#ffd700}
 .case{font-size:56px;margin-bottom:10px;filter:drop-shadow(0 6px 20px rgba(255,215,0,.5));animation:fl 3s ease-in-out infinite}
@@ -46,7 +48,8 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 </head>
 <body>
 <h1>🎰 МЕМТОП КЕЙС</h1>
-<div class="sub">Открытие как в CS2 · v10</div>
+<div class="sub">Открытие как в CS2 · v11</div>
+<div class="linkwarn" id="linkWarn">⚠️ Рулетка открыта НЕ из бота! Закрой это окно и открой рулетку кнопкой 🎰 РУЛЕТКА внутри бота — иначе результат не дойдёт.</div>
 <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
 <div class="case" id="case">🧰</div>
 <div class="reel-box"><div class="marker"></div><div class="strip" id="strip"></div></div>
@@ -64,7 +67,15 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 </div>
 <script>
 const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-if (tg) { tg.ready(); tg.expand(); }
+let linked = false;
+if (tg) {
+  tg.ready(); tg.expand();
+  linked = !!(tg.initData && tg.initData.length > 0 && tg.initDataUnsafe && tg.initDataUnsafe.user);
+}
+if (!linked) {
+  document.getElementById('linkWarn').style.display = 'block';
+  document.getElementById('openBtn').disabled = true;
+}
 
 let userCoins = 0;
 try {
@@ -100,8 +111,6 @@ const ITEMS = [
   {t:'tag_pchela',em:'🐝', nm:'Пчела',        rar:'common',    ch:5},
   {t:'nothing',   em:'💨', nm:'Пусто',        rar:'ban',       ch:35}
 ];
-// суммы: 5+5+5+5*4+5*6+35 = 100
-
 function roll(){ const r=Math.random()*100; let a=0; for(const it of ITEMS){a+=it.ch; if(r<a) return it;} return ITEMS[ITEMS.length-1]; }
 function fillIdx(){ const pool=[]; ITEMS.forEach((it,i)=>{for(let k=0;k<it.ch;k++)pool.push(i);}); return pool[Math.floor(Math.random()*pool.length)]; }
 function makeCard(it){ const c=document.createElement('div'); c.className='card'; c.style.setProperty('--rar',RAR[it.rar].c);
@@ -119,7 +128,7 @@ ITEMS.forEach(it=>{ const d=document.createElement('div'); d.className='legend-i
   legend.appendChild(d); });
 
 openBtn.addEventListener('click', ()=>{
-  if(spinning) return; spinning=true; openBtn.disabled=true; overlay.classList.remove('show');
+  if(spinning || !linked) return; spinning=true; openBtn.disabled=true; overlay.classList.remove('show');
   if(tg&&tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
   caseEl.classList.add('shaking'); setTimeout(()=>caseEl.classList.remove('shaking'),650);
   const winner=roll();
@@ -147,13 +156,12 @@ function showResult(it){
   document.getElementById('rText').textContent = (it.t==='coin') ? '+10 Топикоинов!' :
       (it.t==='ban') ? 'Бан на 5 часов.' : (it.t==='nothing') ? 'Ничего не выпало.' : 'Тег получен!';
   const st=document.getElementById('sendStatus');
-  // Отправляем результат боту и показываем статус прямо на экране
   let ok=false, err='';
   try {
-    if (tg && tg.sendData) { tg.sendData(JSON.stringify({type: it.t})); ok=true; }
-    else err='нет tg.sendData';
+    if (tg && tg.sendData && linked) { tg.sendData(JSON.stringify({type: it.t})); ok=true; }
+    else err='нет связи с ботом';
   } catch(e){ err=String(e); }
-  if (ok) { st.textContent='✅ Данные ушли боту'; st.className='send-status send-ok'; }
+  if (ok) { st.textContent='✅ Данные ушли боту — тег/монеты появятся у имени'; st.className='send-status send-ok'; }
   else { st.textContent='⚠️ Не удалось отправить: '+err; st.className='send-status send-err'; }
   if(tg&&tg.HapticFeedback) tg.HapticFeedback.notificationOccurred(ok?'success':'error');
   overlay.classList.add('show');
