@@ -43,9 +43,13 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 .result-title{font-size:20px;font-weight:800;margin-bottom:6px}
 .result-rar{font-size:13px;font-weight:700;margin-bottom:6px}
 .result-text{font-size:12px;color:#b8a5d9;line-height:1.5;margin-bottom:12px}
-.claim-btn{display:block;background:#ffd700;color:#12081f;border:none;padding:12px 30px;border-radius:20px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;margin:0 auto 10px}
+
+/* Контейнер кнопок результата */
+.result-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px}
+.claim-btn{flex:1 1 100%;background:#ffd700;color:#12081f;border:none;padding:12px 30px;border-radius:20px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;text-align:center}
 .claim-btn:active{transform:scale(.95)}
-.again-btn{display:block;background:transparent;color:#b8a5d9;border:1px solid #b8a5d9;padding:10px 26px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer;margin:0 auto}
+.again-btn,.back-btn{flex:1 1 auto;background:transparent;color:#b8a5d9;border:1px solid #b8a5d9;padding:10px 18px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer;min-width:110px}
+.again-btn:active,.back-btn:active{transform:scale(.95);background:rgba(184,165,217,.1)}
 
 /* Форма для Топикоинов */
 .coin-form{margin-top:10px}
@@ -82,7 +86,7 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 </head>
 <body>
 <h1>🎰 МЕМТОП КЕЙС</h1>
-<div class="sub">Открытие как в CS2 · v15</div>
+<div class="sub">Открытие как в CS2 · v16</div>
 <div class="linkwarn" id="linkWarn">⚠️ Рулетка открыта НЕ из бота! Закрой это окно и открой рулетку кнопкой 🎰 РУЛЕТКА внутри бота.</div>
 <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
 <button class="tags-btn" id="tagsBtn">🏷 МОИ ТЕГИ (<span id="tagsCount">0</span>)</button>
@@ -97,8 +101,11 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
     <div class="result-title" id="rTitle"></div>
     <div class="result-rar" id="rRar"></div>
     <div class="result-text" id="rText"></div>
-    <a class="claim-btn" id="claimBtn" href="#">🎁 ЗАБРАТЬ ПРИЗ</a>
-    <button class="again-btn" id="againBtn">Крутить ещё</button>
+    <div class="result-actions">
+      <a class="claim-btn" id="claimBtn" href="#">🎁 ЗАБРАТЬ ПРИЗ</a>
+      <button class="again-btn" id="againBtn">🔄 Крутить ещё</button>
+      <button class="back-btn" id="backBtn">← Назад</button>
+    </div>
   </div>
 </div>
 
@@ -121,7 +128,6 @@ if(tg){tg.ready();tg.expand();linked=!!(tg.initData&&tg.initData.length>0&&tg.in
 if(!linked){document.getElementById('linkWarn').style.display='block';document.getElementById('openBtn').disabled=true;}
 
 const BOT_USERNAME="BetaMemTop26_bot";
-const OWNER_ID="5828092407";
 const SECRET="memtop_roulette_secret_2024";
 
 async function hmacSign(payload){
@@ -157,12 +163,13 @@ const RAR={
  gold:{c:'#ffd700',label:'🌟 Золотой'},
  legendary:{c:'#eb4b4b',label:'🔴 Легендарный'},
  rare:{c:'#8847ff',label:'🟣 Редкий'},
- common:{c:'#4b69ff',label:'🔵 Обычный'},
- ban:{c:'#555555',label:'⚫ Штраф'}
+ common:{c:'#4b69ff',label:'🔵 Обычный'}
 };
+
+// Шансы: 5 (coin) + 11*5 (теги) + 40 (пусто) = 100
+// БАНА НЕТ!
 const ITEMS=[
  {t:'coin',em:'🪙',nm:'10 Топикоинов',rar:'gold',ch:5},
- {t:'ban',em:'🚫',nm:'Бан 5 часов',rar:'ban',ch:5},
  {t:'tag_vip',em:'💎',nm:'VIP',rar:'legendary',ch:5},
  {t:'tag_pepe',em:'🐸',nm:'Пепе',rar:'rare',ch:5},
  {t:'tag_joker',em:'🃏',nm:'Джокер',rar:'rare',ch:5},
@@ -174,7 +181,7 @@ const ITEMS=[
  {t:'tag_temny',em:'🌚',nm:'Тёмный',rar:'common',ch:5},
  {t:'tag_turbo',em:'🐢',nm:'Турбо',rar:'common',ch:5},
  {t:'tag_pchela',em:'🐝',nm:'Пчела',rar:'common',ch:5},
- {t:'nothing',em:'💨',nm:'Пусто',rar:'ban',ch:35}
+ {t:'nothing',em:'💨',nm:'Пусто',rar:'common',ch:40}
 ];
 
 function roll(){const r=Math.random()*100;let a=0;for(const it of ITEMS){a+=it.ch;if(r<a)return it;}return ITEMS[ITEMS.length-1];}
@@ -185,6 +192,7 @@ function makeCard(it){const c=document.createElement('div');c.className='card';c
 const strip=document.getElementById('strip'),openBtn=document.getElementById('openBtn'),
  overlay=document.getElementById('overlay'),caseEl=document.getElementById('case'),
  claimBtn=document.getElementById('claimBtn'),againBtn=document.getElementById('againBtn'),
+ backBtn=document.getElementById('backBtn'),
  tagsBtn=document.getElementById('tagsBtn'),tagsModal=document.getElementById('tagsModal'),
  tagsModalClose=document.getElementById('tagsModalClose'),tagsGrid=document.getElementById('tagsGrid'),
  tagsActiveName=document.getElementById('tagsActiveName'),tagsCount=document.getElementById('tagsCount');
@@ -200,6 +208,11 @@ ITEMS.forEach(it=>{const d=document.createElement('div');d.className='legend-ite
 
 tagsBtn.addEventListener('click',openTagsModal);
 tagsModalClose.addEventListener('click',()=>tagsModal.classList.remove('show'));
+
+// Кнопка «Назад» — закрывает окно и возвращает к рулетке
+backBtn.addEventListener('click',()=>{
+  overlay.classList.remove('show');
+});
 
 function openTagsModal(){
   renderTagsGrid();
@@ -291,14 +304,15 @@ async function showResult(it){
    document.getElementById('rText').textContent='Ничего не выпало. Попробуй ещё раз!';
    claimBtn.style.display='none';
    againBtn.style.display='block';
+   backBtn.style.display='block';
    if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('warning');
  } else if(it.t==='coin'){
-   // Для топикоинов — показываем форму вместо кнопки "Забрать приз"
+   // Топикоины — форма вместо кнопок
    document.getElementById('rText').innerHTML='🎉 <b style="color:#ffd700">Поздравляю!</b><br>Введите свои данные для вручения приза';
    claimBtn.style.display='none';
    againBtn.style.display='none';
+   backBtn.style.display='none';
    
-   // Создаём форму
    const form=document.createElement('div');
    form.className='coin-form';
    form.id='coinForm';
@@ -311,7 +325,6 @@ async function showResult(it){
    `;
    document.querySelector('.result-box').appendChild(form);
    
-   // Генерируем подпись один раз для всей формы
    const nonce=randNonce();
    const sig=await hmacSign(it.t+"_"+nonce);
    
@@ -346,20 +359,20 @@ async function showResult(it){
        document.getElementById('coinSubmitBtn').textContent='📨 Отправить владельцу';
      }
      
-     // Обновляем резервную кнопку
      const reserveMsg=`🎰 Я выбил ТОПИКОИНЫ в МЕМТОП!\n\n👤 ФИО: ${fio}\n🎓 Группа: ${group}\n🪙 Награда: 10 монет\n\nПрошу выдать приз!`;
      document.getElementById('coinReserveBtn').href=`https://t.me/share/url?url=&text=${encodeURIComponent(reserveMsg)}`;
    });
    
-   // Изначально резервная кнопка ведёт на простой текст
    const reserveMsg=`🎰 Я выбил ТОПИКОИНЫ в МЕМТОП!\n\n👤 ФИО: (укажи)\n🎓 Группа: (укажи)\n🪙 Награда: 10 монет\n\nПрошу выдать приз!`;
    document.getElementById('coinReserveBtn').href=`https://t.me/share/url?url=&text=${encodeURIComponent(reserveMsg)}`;
    
    if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
  } else {
+   // Теги — стандартные кнопки
    document.getElementById('rText').textContent='Нажми «Забрать приз», чтобы бот начислил награду.';
    claimBtn.style.display='block';
    againBtn.style.display='block';
+   backBtn.style.display='block';
    claimBtn.onclick=null;
    try{
      const nonce=randNonce();
