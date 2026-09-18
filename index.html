@@ -76,6 +76,8 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 .tag-item .em{font-size:32px;margin-bottom:4px}
 .tag-item .nm{font-size:12px;font-weight:700;margin-bottom:2px}
 .tag-item .rar-label{font-size:10px;color:var(--rar,#999);font-weight:600}
+.tags-empty{text-align:center;color:#b8a5d9;padding:40px 20px;font-size:14px}
+.tags-empty-icon{font-size:50px;margin-bottom:12px;opacity:.5}
 @keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,20px)}20%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-20px)}}
 </style>
 </head>
@@ -134,38 +136,10 @@ async function hmacSign(payload){
 }
 function randNonce(){return Math.random().toString(36).slice(2,10);}
 
-// === СЛИЯНИЕ ДАННЫХ ИЗ URL И LOCALSTORAGE ===
-// URL содержит состояние на момент открытия Web App из бота
-// localStorage содержит последнее известное состояние (свежее)
 const sp=new URLSearchParams(location.search);
 let userCoins=parseInt(sp.get('c')||'0',10)||0;
-
-// Загружаем из localStorage (если есть)
-let userTags=[];
-let userActive='';
-try{
-  const storedTags=localStorage.getItem('memtop_tags');
-  const storedActive=localStorage.getItem('memtop_active');
-  if(storedTags){ userTags=JSON.parse(storedTags); }
-  if(storedActive){ userActive=storedActive; }
-}catch(e){}
-
-// Если localStorage пустой — берём из URL (первый запуск)
-if(userTags.length===0){
-  userTags=(sp.get('tags')||'').split(',').filter(x=>x.length>0);
-}
-if(!userActive){
-  userActive=decodeURIComponent(sp.get('active')||'');
-}
-
-function saveTagsToStorage(){
-  try{
-    localStorage.setItem('memtop_tags', JSON.stringify(userTags));
-    localStorage.setItem('memtop_active', userActive);
-  }catch(e){}
-}
-saveTagsToStorage();
-
+let userTags=(sp.get('tags')||'').split(',').filter(x=>x.length>0);
+let userActive=decodeURIComponent(sp.get('active')||'');
 document.getElementById('coins').textContent=userCoins;
 
 const TAG_INFO={
@@ -182,11 +156,7 @@ const TAG_INFO={
   tag_pchela:{em:'🐝',nm:'Пчела',rar:'common',label:'🔵 Обычный',c:'#4b69ff'},
 };
 const TOTAL_TAGS=Object.keys(TAG_INFO).length;
-
-function updateTagsCounter(){
-  document.getElementById('tagsCount').textContent=userTags.length+'/'+TOTAL_TAGS;
-}
-updateTagsCounter();
+document.getElementById('tagsCount').textContent=userTags.length+'/'+TOTAL_TAGS;
 
 const RAR={
  gold:{c:'#ffd700',label:'🌟 Золотой'},
@@ -196,6 +166,7 @@ const RAR={
  none:{c:'#555555',label:''}
 };
 
+// Шансы: 5 (coin) + 11*5 (теги) + 40 (пусто) = 100. БАНА НЕТ.
 const ITEMS=[
  {t:'coin',em:'🪙',nm:'10 Топикоинов',rar:'gold',ch:5},
  {t:'tag_vip',em:'💎',nm:'VIP',rar:'legendary',ch:5},
@@ -223,7 +194,7 @@ const strip=document.getElementById('strip'),openBtn=document.getElementById('op
  backBtn=document.getElementById('backBtn'),
  tagsBtn=document.getElementById('tagsBtn'),tagsModal=document.getElementById('tagsModal'),
  tagsModalClose=document.getElementById('tagsModalClose'),tagsGrid=document.getElementById('tagsGrid'),
- tagsActiveName=document.getElementById('tagsActiveName'),
+ tagsActiveName=document.getElementById('tagsActiveName'),tagsCount=document.getElementById('tagsCount'),
  tagsCounter=document.getElementById('tagsCounter');
 
 const CARD_W=120,REEL_LEN=60,WIN_INDEX=50;
@@ -238,6 +209,11 @@ ITEMS.forEach(it=>{const d=document.createElement('div');d.className='legend-ite
 tagsBtn.addEventListener('click',openTagsModal);
 tagsModalClose.addEventListener('click',()=>tagsModal.classList.remove('show'));
 backBtn.addEventListener('click',()=>{overlay.classList.remove('show');});
+
+function openTelegram(url){
+  if(tg&&tg.openTelegramLink){tg.openTelegramLink(url);}
+  else{window.location.href=url;}
+}
 
 function openTagsModal(){
   renderTagsGrid();
@@ -254,46 +230,36 @@ function renderTagsGrid(){
     const item=document.createElement('div');
     item.className='tag-item'+(owned?'':' locked')+(userActive===info.nm?' is-active':'');
     item.style.setProperty('--rar', owned?info.c:'#444');
-    item.innerHTML=`
-      <div class="em">${owned?info.em:'🔒'}</div>
-      <div class="nm">${info.nm}</div>
-      <div class="rar-label">${owned?info.label:'не получено'}</div>
-    `;
-    if(owned){
-      item.addEventListener('click',()=>selectTag(tagType,info.nm));
-    }
+    item.innerHTML='<div class="em">'+(owned?info.em:'🔒')+'</div>'+
+      '<div class="nm">'+info.nm+'</div>'+
+      '<div class="rar-label">'+(owned?info.label:'не получено')+'</div>';
+    if(owned){item.addEventListener('click',()=>selectTag(tagType,info.nm));}
     tagsGrid.appendChild(item);
   });
 }
 
+// Смена активного тега: ГАРАНТИРОВАННО через deep-link
 async function selectTag(tagType,tagText){
   if(userActive===tagText){
     if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('warning');
     return;
   }
-  try{
-    if(tg&&tg.sendData){
-      tg.sendData(JSON.stringify({type:'select_tag',tag:tagType}));
-      userActive=tagText;
-      saveTagsToStorage();
-      renderTagsGrid();
-      tagsModal.classList.remove('show');
-      if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
-      showQuickToast('✅ '+tagText+' активирован!');
-      // Закрываем Web App через 2 сек — при следующем открытии URL будет свежий
-      setTimeout(()=>{if(tg&&tg.close)tg.close();},2000);
-    }
-  }catch(e){
-    showQuickToast('⚠️ Не удалось сменить тег');
-  }
+  const nonce=randNonce();
+  const sig=await hmacSign(tagType+"_"+nonce);
+  const claimUrl="https://t.me/"+BOT_USERNAME+"?start=claim_"+tagType+"_"+nonce+"_"+sig;
+  userActive=tagText;
+  renderTagsGrid();
+  tagsModal.classList.remove('show');
+  showQuickToast('✅ '+tagText+' активирован!');
+  openTelegram(claimUrl);
 }
 
 function showQuickToast(text){
   const toast=document.createElement('div');
   toast.textContent=text;
-  toast.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#ffd700;color:#12081f;padding:10px 20px;border-radius:20px;font-weight:700;z-index:100;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:fadeInOut 2.5s ease forwards';
+  toast.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#ffd700;color:#12081f;padding:10px 20px;border-radius:20px;font-weight:700;z-index:100;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:fadeInOut 2s ease';
   document.body.appendChild(toast);
-  setTimeout(()=>toast.remove(),2500);
+  setTimeout(()=>toast.remove(),2000);
 }
 
 openBtn.addEventListener('click',()=>{
@@ -341,13 +307,11 @@ async function showResult(it){
    backBtn.style.display='none';
    const form=document.createElement('div');
    form.className='coin-form';form.id='coinForm';
-   form.innerHTML=`
-     <div class="coin-form-error" id="coinFormError"></div>
-     <input type="text" id="fioInput" placeholder="ФИО (например: Иванов Иван Иванович)" maxlength="100">
-     <input type="text" id="groupInput" placeholder="Группа (например: ИС-21-1)" maxlength="50">
-     <button class="coin-submit-btn" id="coinSubmitBtn">📨 Отправить владельцу</button>
-     <a class="coin-reserve-btn" id="coinReserveBtn" href="#" target="_blank">⚠️ Если не получилось — написать вручную</a>
-   `;
+   form.innerHTML='<div class="coin-form-error" id="coinFormError"></div>'+
+     '<input type="text" id="fioInput" placeholder="ФИО (например: Иванов Иван Иванович)" maxlength="100">'+
+     '<input type="text" id="groupInput" placeholder="Группа (например: ИС-21-1)" maxlength="50">'+
+     '<button class="coin-submit-btn" id="coinSubmitBtn">📨 Отправить владельцу</button>'+
+     '<a class="coin-reserve-btn" id="coinReserveBtn" href="#" target="_blank">⚠️ Если не получилось — написать вручную</a>';
    document.querySelector('.result-box').appendChild(form);
    const nonce=randNonce();
    const sig=await hmacSign(it.t+"_"+nonce);
@@ -364,9 +328,8 @@ async function showResult(it){
      try{
        if(tg&&tg.sendData){
          tg.sendData(JSON.stringify({type:'coin',fio:fio,group:group,nonce:nonce,sig:sig}));
-         showQuickToast('✅ Данные отправлены и сохранены!');
-         document.getElementById('coinSubmitBtn').textContent='✅ Готово!';
-         setTimeout(()=>{if(tg&&tg.close)tg.close();},2500);
+         showQuickToast('✅ Данные отправлены!');
+         setTimeout(()=>{if(tg&&tg.close)tg.close();},1500);
        } else {
          errEl.textContent='⚠️ Telegram недоступен. Используйте резервную кнопку ниже.';
          document.getElementById('coinSubmitBtn').disabled=false;
@@ -377,14 +340,14 @@ async function showResult(it){
        document.getElementById('coinSubmitBtn').disabled=false;
        document.getElementById('coinSubmitBtn').textContent='📨 Отправить владельцу';
      }
-     const reserveMsg=`🎰 Я выбил ТОПИКОИНЫ в МЕМТОП!\n\n👤 ФИО: ${fio}\n🎓 Группа: ${group}\n🪙 Награда: 10 монет\n\nПрошу выдать приз!`;
-     document.getElementById('coinReserveBtn').href=`https://t.me/share/url?url=&text=${encodeURIComponent(reserveMsg)}`;
+     const reserveMsg='🎰 Я выбил ТОПИКОИНЫ в МЕМТОП!\n\n👤 ФИО: '+fio+'\n🎓 Группа: '+group+'\n🪙 Награда: 10 монет\n\nПрошу выдать приз!';
+     document.getElementById('coinReserveBtn').href='https://t.me/share/url?url=&text='+encodeURIComponent(reserveMsg);
    });
-   const reserveMsg=`🎰 Я выбил ТОПИКОИНЫ в МЕМТОП!\n\n👤 ФИО: (укажи)\n🎓 Группа: (укажи)\n🪙 Награда: 10 монет\n\nПрошу выдать приз!`;
-   document.getElementById('coinReserveBtn').href=`https://t.me/share/url?url=&text=${encodeURIComponent(reserveMsg)}`;
+   const reserveMsg0='🎰 Я выбил ТОПИКОИНЫ в МЕМТОП!\n\n👤 ФИО: (укажи)\n🎓 Группа: (укажи)\n🪙 Награда: 10 монет\n\nПрошу выдать приз!';
+   document.getElementById('coinReserveBtn').href='https://t.me/share/url?url=&text='+encodeURIComponent(reserveMsg0);
    if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
  } else {
-   // ТЕГ — кнопка «НАДЕТЬ»
+   // ТЕГ — кнопка «НАДЕТЬ»: ГАРАНТИРОВАННО через deep-link
    document.getElementById('rText').textContent='Нажми «Надеть», чтобы активировать тег и добавить его в коллекцию.';
    claimBtn.style.display='block';
    claimBtn.textContent='🎽 Надеть';
@@ -393,37 +356,17 @@ async function showResult(it){
    const nonce=randNonce();
    const sig=await hmacSign(it.t+"_"+nonce);
    const info=TAG_INFO[it.t];
-   // Fallback deep link на случай, если sendData не дойдёт
-   claimBtn.href="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nonce+"_"+sig;
-   
+   const claimUrl="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nonce+"_"+sig;
+   claimBtn.href=claimUrl;
    claimBtn.onclick=(e)=>{
      e.preventDefault();
-     (async()=>{
-       claimBtn.textContent='⏳ Отправка...';
-       claimBtn.style.pointerEvents='none';
-       try{
-         if(tg&&tg.sendData){
-           tg.sendData(JSON.stringify({type:it.t,nonce:nonce,sig:sig}));
-           // Локально добавляем тег в коллекцию
-           if(!userTags.includes(it.t)){
-             userTags.push(it.t);
-           }
-           userActive=info.nm;
-           saveTagsToStorage();
-           updateTagsCounter();
-           showQuickToast('✅ Тег '+info.nm+' надет!');
-           // Закрываем Web App через 2.5 сек — при следующем открытии URL будет свежий
-           setTimeout(()=>{if(tg&&tg.close)tg.close();},2500);
-         } else {
-           // Fallback: открываем deep link
-           window.location.href=claimBtn.href;
-         }
-       }catch(err){
-         window.location.href=claimBtn.href;
-       }
-     })();
+     if(!userTags.includes(it.t)) userTags.push(it.t);
+     userActive=info.nm;
+     tagsCount.textContent=userTags.length+'/'+TOTAL_TAGS;
+     showQuickToast('✅ Тег '+info.nm+' надет!');
+     overlay.classList.remove('show');
+     openTelegram(claimUrl);
    };
-   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
  }
  overlay.classList.add('show');
 }
