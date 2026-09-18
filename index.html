@@ -42,12 +42,13 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 .result-rar{font-size:13px;font-weight:700;margin-bottom:6px}
 .result-text{font-size:12px;color:#b8a5d9;line-height:1.5;margin-bottom:12px}
 .claim-btn{display:block;background:#ffd700;color:#12081f;border:none;padding:12px 30px;border-radius:20px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;margin:0 auto 10px}
+.claim-btn:active{transform:scale(.95)}
 .again-btn{display:block;background:transparent;color:#b8a5d9;border:1px solid #b8a5d9;padding:10px 26px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer;margin:0 auto}
 </style>
 </head>
 <body>
 <h1>🎰 МЕМТОП КЕЙС</h1>
-<div class="sub">Открытие как в CS2 · v12</div>
+<div class="sub">Открытие как в CS2 · v13</div>
 <div class="linkwarn" id="linkWarn">⚠️ Рулетка открыта НЕ из бота! Закрой это окно и открой рулетку кнопкой 🎰 РУЛЕТКА внутри бота — иначе приз не забрать.</div>
 <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
 <div class="case" id="case">🧰</div>
@@ -59,7 +60,7 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
     <div class="result-emoji" id="rEmoji">🎉</div>
     <div class="result-title" id="rTitle"></div>
     <div class="result-rar" id="rRar"></div>
-    <div class="result-text" id="rText">Нажми «Забрать приз», чтобы бот начислил награду.</div>
+    <div class="result-text" id="rText"></div>
     <a class="claim-btn" id="claimBtn" href="#">🎁 ЗАБРАТЬ ПРИЗ</a>
     <button class="again-btn" id="againBtn">Крутить ещё</button>
   </div>
@@ -73,15 +74,13 @@ if(!linked){document.getElementById('linkWarn').style.display='block';document.g
 const BOT_USERNAME="BetaMemTop26_bot";
 const SECRET="memtop_roulette_secret_2024";
 
-// простой HMAC-подобный хеш (достаточно для защиты от ручного подбора)
-function sign(payload){
-  let h1=0x811c9dc5, h2=0x01000193;
-  const s=SECRET+"|"+payload;
-  for(let i=0;i<s.length;i++){
-    h1^=s.charCodeAt(i); h1=Math.imul(h1,0x01000193)>>>0;
-    h2=(h2*31+s.charCodeAt(i))>>>0;
-  }
-  return (h1.toString(16).padStart(8,'0')+h2.toString(16).padStart(8,'0')).slice(0,10);
+// HMAC-SHA256 как в боте: hmac.new(SECRET, payload, sha256).hexdigest()[:10]
+async function hmacSign(payload){
+  const enc=new TextEncoder();
+  const key=await crypto.subtle.importKey('raw',enc.encode(SECRET),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+  const sig=await crypto.subtle.sign('HMAC',key,enc.encode(payload));
+  const hex=Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  return hex.slice(0,10);
 }
 function randNonce(){return Math.random().toString(36).slice(2,10);}
 
@@ -154,17 +153,31 @@ openBtn.addEventListener('click',()=>{
  },6500);
 });
 
-function showResult(it){
+async function showResult(it){
  document.getElementById('rEmoji').textContent=it.em;
  document.getElementById('rTitle').textContent=it.nm;
  const r=document.getElementById('rRar');r.textContent=RAR[it.rar].label;r.style.color=RAR[it.rar].c;
- // готовим ссылку-подтверждение для бота
- const nonce=randNonce();
- const sig=sign(it.t+"_"+nonce);
- claimBtn.href="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nonce+"_"+sig;
- // запасной канал (может не дойти) — не страшно, есть кнопка
- try{if(tg&&tg.sendData)tg.sendData(JSON.stringify({type:it.t,nonce:nonce,sig:sig}));}catch(e){}
- if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+
+ if(it.t==='nothing'){
+   document.getElementById('rText').textContent='Ничего не выпало. Попробуй ещё раз!';
+   claimBtn.style.display='none';
+   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('warning');
+ } else {
+   document.getElementById('rText').textContent='Нажми «Забрать приз», чтобы бот начислил награду.';
+   claimBtn.style.display='block';
+   claimBtn.onclick=null;
+   try{
+     const nonce=randNonce();
+     const sig=await hmacSign(it.t+"_"+nonce);
+     claimBtn.href="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nonce+"_"+sig;
+     // запасной канал (может не дойти) — не страшно, есть кнопка
+     try{if(tg&&tg.sendData)tg.sendData(JSON.stringify({type:it.t,nonce:nonce,sig:sig}));}catch(e){}
+   }catch(e){
+     claimBtn.style.display='none';
+     document.getElementById('rText').textContent='⚠️ Не удалось создать приз. Обнови Telegram и попробуй ещё раз.';
+   }
+   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+ }
  overlay.classList.add('show');
 }
 againBtn.addEventListener('click',()=>{overlay.classList.remove('show');openBtn.click();});
