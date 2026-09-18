@@ -83,7 +83,7 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 </head>
 <body>
 <h1>🎰 МЕМТОП КЕЙС</h1>
-<div class="sub">Открытие как в CS2 · v19</div>
+<div class="sub">Открытие как в CS2</div>
 <div class="linkwarn" id="linkWarn">⚠️ Рулетка открыта НЕ из бота! Закрой это окно и открой рулетку кнопкой 🎰 РУЛЕТКА внутри бота.</div>
 <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
 <button class="tags-btn" id="tagsBtn">🏷 МОИ ТЕГИ (<span id="tagsCount">0/11</span>)</button>
@@ -136,10 +136,25 @@ async function hmacSign(payload){
 }
 function randNonce(){return Math.random().toString(36).slice(2,10);}
 
+// === localStorage-синхронизация тегов (мгновенное обновление без перезапуска) ===
+const LS_TAGS='memtop_tags_v1';
+const LS_ACTIVE='memtop_active_v1';
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
 const sp=new URLSearchParams(location.search);
 let userCoins=parseInt(sp.get('c')||'0',10)||0;
 let userTags=(sp.get('tags')||'').split(',').filter(x=>x.length>0);
 let userActive=decodeURIComponent(sp.get('active')||'');
+
+// Объединяем теги из URL с локально сохранёнными (мгновенно, без перезапуска)
+const lsTags=lsGet(LS_TAGS,[]);
+lsTags.forEach(t=>{if(!userTags.includes(t))userTags.push(t);});
+lsSet(LS_TAGS,userTags);
+const lsActive=lsGet(LS_ACTIVE,'');
+if(!userActive && lsActive) userActive=lsActive;
+if(userActive && !lsActive) lsSet(LS_ACTIVE,userActive);
+
 document.getElementById('coins').textContent=userCoins;
 
 const TAG_INFO={
@@ -246,6 +261,7 @@ async function selectTag(tagType,tagText){
   const sig=await hmacSign(tagType+"_"+nonce);
   const claimUrl="https://t.me/"+BOT_USERNAME+"?start=claim_"+tagType+"_"+nonce+"_"+sig;
   userActive=tagText;
+  lsSet(LS_ACTIVE,tagText);          // ← локально сразу
   renderTagsGrid();
   tagsModal.classList.remove('show');
   showQuickToast('✅ '+tagText+' активирован!');
@@ -358,13 +374,12 @@ async function showResult(it){
    claimBtn.href=claimUrl;
    claimBtn.onclick=(e)=>{
      e.preventDefault();
-     // Локально пополняем коллекцию и активируем
-     if(!userTags.includes(it.t)) userTags.push(it.t);
+     if(!userTags.includes(it.t)){userTags.push(it.t); lsSet(LS_TAGS,userTags);}   // ← локально сразу
      userActive=info.nm;
+     lsSet(LS_ACTIVE,info.nm);                                                    // ← локально сразу
      tagsCount.textContent=userTags.length+'/'+TOTAL_TAGS;
      showQuickToast('✅ Тег '+info.nm+' надет!');
      overlay.classList.remove('show');
-     // Deep-link: бот получит claim, обновит базу и покажет НОВОЕ меню со свежим URL
      openTelegram(claimUrl);
    };
  }
