@@ -332,8 +332,9 @@ async function showResult(it){
      try{
        if(tg&&tg.sendData){
          tg.sendData(JSON.stringify({type:'coin',fio:fio,group:group,nonce:nonce,sig:sig}));
-         showQuickToast('✅ Данные отправлены!');
-         setTimeout(()=>{if(tg&&tg.close)tg.close();},1500);
+         showQuickToast('✅ Данные отправлены и сохранены!');
+         document.getElementById('coinSubmitBtn').textContent='✅ Готово!';
+         setTimeout(()=>{if(tg&&tg.close)tg.close();},2500);
        } else {
          errEl.textContent='⚠️ Telegram недоступен. Используйте резервную кнопку ниже.';
          document.getElementById('coinSubmitBtn').disabled=false;
