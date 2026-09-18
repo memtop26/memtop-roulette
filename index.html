@@ -76,14 +76,12 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 .tag-item .em{font-size:32px;margin-bottom:4px}
 .tag-item .nm{font-size:12px;font-weight:700;margin-bottom:2px}
 .tag-item .rar-label{font-size:10px;color:var(--rar,#999);font-weight:600}
-.tags-empty{text-align:center;color:#b8a5d9;padding:40px 20px;font-size:14px}
-.tags-empty-icon{font-size:50px;margin-bottom:12px;opacity:.5}
 @keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,20px)}20%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-20px)}}
 </style>
 </head>
 <body>
 <h1>🎰 МЕМТОП КЕЙС</h1>
-<div class="sub">Открытие как в CS2 · v17</div>
+<div class="sub">Открытие как в CS2 · v18</div>
 <div class="linkwarn" id="linkWarn">⚠️ Рулетка открыта НЕ из бота! Закрой это окно и открой рулетку кнопкой 🎰 РУЛЕТКА внутри бота.</div>
 <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
 <button class="tags-btn" id="tagsBtn">🏷 МОИ ТЕГИ (<span id="tagsCount">0/11</span>)</button>
@@ -136,10 +134,38 @@ async function hmacSign(payload){
 }
 function randNonce(){return Math.random().toString(36).slice(2,10);}
 
+// === СЛИЯНИЕ ДАННЫХ ИЗ URL И LOCALSTORAGE ===
+// URL содержит состояние на момент открытия Web App из бота
+// localStorage содержит последнее известное состояние (свежее)
 const sp=new URLSearchParams(location.search);
 let userCoins=parseInt(sp.get('c')||'0',10)||0;
-let userTags=(sp.get('tags')||'').split(',').filter(x=>x.length>0);
-let userActive=decodeURIComponent(sp.get('active')||'');
+
+// Загружаем из localStorage (если есть)
+let userTags=[];
+let userActive='';
+try{
+  const storedTags=localStorage.getItem('memtop_tags');
+  const storedActive=localStorage.getItem('memtop_active');
+  if(storedTags){ userTags=JSON.parse(storedTags); }
+  if(storedActive){ userActive=storedActive; }
+}catch(e){}
+
+// Если localStorage пустой — берём из URL (первый запуск)
+if(userTags.length===0){
+  userTags=(sp.get('tags')||'').split(',').filter(x=>x.length>0);
+}
+if(!userActive){
+  userActive=decodeURIComponent(sp.get('active')||'');
+}
+
+function saveTagsToStorage(){
+  try{
+    localStorage.setItem('memtop_tags', JSON.stringify(userTags));
+    localStorage.setItem('memtop_active', userActive);
+  }catch(e){}
+}
+saveTagsToStorage();
+
 document.getElementById('coins').textContent=userCoins;
 
 const TAG_INFO={
@@ -156,17 +182,20 @@ const TAG_INFO={
   tag_pchela:{em:'🐝',nm:'Пчела',rar:'common',label:'🔵 Обычный',c:'#4b69ff'},
 };
 const TOTAL_TAGS=Object.keys(TAG_INFO).length;
-document.getElementById('tagsCount').textContent=userTags.length+'/'+TOTAL_TAGS;
+
+function updateTagsCounter(){
+  document.getElementById('tagsCount').textContent=userTags.length+'/'+TOTAL_TAGS;
+}
+updateTagsCounter();
 
 const RAR={
  gold:{c:'#ffd700',label:'🌟 Золотой'},
  legendary:{c:'#eb4b4b',label:'🔴 Легендарный'},
  rare:{c:'#8847ff',label:'🟣 Редкий'},
  common:{c:'#4b69ff',label:'🔵 Обычный'},
- none:{c:'#555555',label:''}   // «Пусто» БЕЗ редкости
+ none:{c:'#555555',label:''}
 };
 
-// Шансы: 5 (coin) + 11*5 (теги) + 40 (пусто) = 100. БАНА НЕТ.
 const ITEMS=[
  {t:'coin',em:'🪙',nm:'10 Топикоинов',rar:'gold',ch:5},
  {t:'tag_vip',em:'💎',nm:'VIP',rar:'legendary',ch:5},
@@ -194,7 +223,7 @@ const strip=document.getElementById('strip'),openBtn=document.getElementById('op
  backBtn=document.getElementById('backBtn'),
  tagsBtn=document.getElementById('tagsBtn'),tagsModal=document.getElementById('tagsModal'),
  tagsModalClose=document.getElementById('tagsModalClose'),tagsGrid=document.getElementById('tagsGrid'),
- tagsActiveName=document.getElementById('tagsActiveName'),tagsCount=document.getElementById('tagsCount'),
+ tagsActiveName=document.getElementById('tagsActiveName'),
  tagsCounter=document.getElementById('tagsCounter');
 
 const CARD_W=120,REEL_LEN=60,WIN_INDEX=50;
@@ -246,10 +275,13 @@ async function selectTag(tagType,tagText){
     if(tg&&tg.sendData){
       tg.sendData(JSON.stringify({type:'select_tag',tag:tagType}));
       userActive=tagText;
+      saveTagsToStorage();
       renderTagsGrid();
       tagsModal.classList.remove('show');
       if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
       showQuickToast('✅ '+tagText+' активирован!');
+      // Закрываем Web App через 2 сек — при следующем открытии URL будет свежий
+      setTimeout(()=>{if(tg&&tg.close)tg.close();},2000);
     }
   }catch(e){
     showQuickToast('⚠️ Не удалось сменить тег');
@@ -259,9 +291,9 @@ async function selectTag(tagType,tagText){
 function showQuickToast(text){
   const toast=document.createElement('div');
   toast.textContent=text;
-  toast.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#ffd700;color:#12081f;padding:10px 20px;border-radius:20px;font-weight:700;z-index:100;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:fadeInOut 2s ease';
+  toast.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#ffd700;color:#12081f;padding:10px 20px;border-radius:20px;font-weight:700;z-index:100;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:fadeInOut 2.5s ease forwards';
   document.body.appendChild(toast);
-  setTimeout(()=>toast.remove(),2000);
+  setTimeout(()=>toast.remove(),2500);
 }
 
 openBtn.addEventListener('click',()=>{
@@ -290,7 +322,7 @@ async function showResult(it){
  document.getElementById('rEmoji').textContent=it.em;
  document.getElementById('rTitle').textContent=it.nm;
  const r=document.getElementById('rRar');
- r.textContent=RAR[it.rar].label;      // для «Пусто» будет пустая строка
+ r.textContent=RAR[it.rar].label;
  r.style.color=RAR[it.rar].c;
 
  const oldForm=document.getElementById('coinForm');
@@ -361,25 +393,37 @@ async function showResult(it){
    const nonce=randNonce();
    const sig=await hmacSign(it.t+"_"+nonce);
    const info=TAG_INFO[it.t];
+   // Fallback deep link на случай, если sendData не дойдёт
    claimBtn.href="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nonce+"_"+sig;
+   
    claimBtn.onclick=(e)=>{
      e.preventDefault();
      (async()=>{
+       claimBtn.textContent='⏳ Отправка...';
+       claimBtn.style.pointerEvents='none';
        try{
          if(tg&&tg.sendData){
            tg.sendData(JSON.stringify({type:it.t,nonce:nonce,sig:sig}));
-           if(!userTags.includes(it.t)) userTags.push(it.t);
+           // Локально добавляем тег в коллекцию
+           if(!userTags.includes(it.t)){
+             userTags.push(it.t);
+           }
            userActive=info.nm;
-           tagsCount.textContent=userTags.length+'/'+TOTAL_TAGS;
+           saveTagsToStorage();
+           updateTagsCounter();
            showQuickToast('✅ Тег '+info.nm+' надет!');
-           overlay.classList.remove('show');
-           if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+           // Закрываем Web App через 2.5 сек — при следующем открытии URL будет свежий
+           setTimeout(()=>{if(tg&&tg.close)tg.close();},2500);
          } else {
+           // Fallback: открываем deep link
            window.location.href=claimBtn.href;
          }
-       }catch(err){ window.location.href=claimBtn.href; }
+       }catch(err){
+         window.location.href=claimBtn.href;
+       }
      })();
    };
+   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
  }
  overlay.classList.add('show');
 }
