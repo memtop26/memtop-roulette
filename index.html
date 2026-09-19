@@ -83,7 +83,7 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 </head>
 <body>
 <h1>🎰 МЕМТОП КЕЙС</h1>
-<div class="sub">Открытие как в CS2 · v21</div>
+<div class="sub">Открытие как в CS2 · v22</div>
 <div class="linkwarn" id="linkWarn">⚠️ Рулетка открыта НЕ из бота! Закрой это окно и открой рулетку кнопкой 🎰 РУЛЕТКА внутри бота.</div>
 <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
 <button class="tags-btn" id="tagsBtn">🏷 МОИ ТЕГИ (<span id="tagsCount">0/11</span>)</button>
@@ -147,7 +147,7 @@ let userCoins=parseInt(sp.get('c')||'0',10)||0;
 let userTags=(sp.get('tags')||'').split(',').filter(x=>x.length>0);
 let userActive=decodeURIComponent(sp.get('active')||'');
 
-// При загрузке: объединяем URL + localStorage
+// Объединяем URL + localStorage
 const lsTags=lsGet(LS_TAGS,[]);
 lsTags.forEach(t=>{if(!userTags.includes(t))userTags.push(t);});
 lsSet(LS_TAGS,userTags);
@@ -220,10 +220,9 @@ ITEMS.forEach(it=>{const d=document.createElement('div');d.className='legend-ite
  d.innerHTML='<div class="dot" style="background:'+RAR[it.rar].c+'"></div><b>'+it.ch+'%</b> — '+it.em+' '+it.nm;
  legend.appendChild(d);});
 
-// === Синхронизация при возврате в Web App ===
+// Синхронизация при возврате в Web App
 document.addEventListener('visibilitychange', ()=>{
   if(!document.hidden){
-    // Перечитываем из localStorage при каждом возврате
     const freshTags=lsGet(LS_TAGS,[]);
     freshTags.forEach(t=>{if(!userTags.includes(t))userTags.push(t);});
     const freshActive=lsGet(LS_ACTIVE,'');
@@ -246,14 +245,13 @@ function openTagsModal(){
   tagsModal.classList.add('show');
 }
 
-// === ВАЖНО: каждый раз читаем свежие данные из localStorage ===
 function renderTagsGrid(){
-  // Обновляем из localStorage при каждом открытии списка
+  // Каждый раз читаем свежие данные из localStorage
   const freshTags=lsGet(LS_TAGS,[]);
   freshTags.forEach(t=>{if(!userTags.includes(t))userTags.push(t);});
   const freshActive=lsGet(LS_ACTIVE,'');
   if(freshActive) userActive=freshActive;
-  
+
   tagsGrid.innerHTML='';
   tagsActiveName.textContent=userActive||'— нет активного тега —';
   const got=userTags.length;
@@ -381,32 +379,40 @@ async function showResult(it){
    document.getElementById('coinReserveBtn').href='https://t.me/share/url?url=&text='+encodeURIComponent(reserveMsg0);
    if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
  } else {
-   // ТЕГ — кнопка «НАДЕТЬ»
-   document.getElementById('rText').textContent='Нажми «Надеть», чтобы активировать тег и добавить его в коллекцию.';
+   // ===== ТЕГ: АВТО-НАЧИСЛЕНИЕ В КОЛЛЕКЦИЮ В МОМЕНТ ВЫПАДЕНИЯ =====
+   const info=TAG_INFO[it.t];
+
+   // Два НЕЗАВИСИМЫХ nonce: один для фоновой синхронизации, второй для ссылки «Надеть»
+   const nonceAuto=randNonce();
+   const sigAuto=await hmacSign(it.t+"_"+nonceAuto);
+   const nonceWear=randNonce();
+   const sigWear=await hmacSign(it.t+"_"+nonceWear);
+   const wearUrl="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nonceWear+"_"+sigWear;
+
+   // 1) Мгновенно добавляем в локальную коллекцию (тег появится в списке СРАЗУ, даже после «Назад»)
+   if(!userTags.includes(it.t)){ userTags.push(it.t); lsSet(LS_TAGS,userTags); }
+   tagsCount.textContent=userTags.length+'/'+TOTAL_TAGS;
+
+   // 2) Фоновая попытка записать в базу бота без перехода в чат
+   try{ if(tg&&tg.sendData) tg.sendData(JSON.stringify({type:it.t,nonce:nonceAuto,sig:sigAuto})); }catch(e){}
+
+   // 3) Показываем окно результата
+   document.getElementById('rText').textContent='🎉 Тег выбит и добавлен в коллекцию! Нажми «Надеть», чтобы показать его рядом с именем.';
    claimBtn.style.display='block';
    claimBtn.textContent='🎽 Надеть';
    againBtn.style.display='block';
    backBtn.style.display='block';
-   const nonce=randNonce();
-   const sig=await hmacSign(it.t+"_"+nonce);
-   const info=TAG_INFO[it.t];
-   const claimUrl="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nonce+"_"+sig;
-   claimBtn.href=claimUrl;
+   claimBtn.href=wearUrl;
    claimBtn.onclick=(e)=>{
      e.preventDefault();
-     // Обновляем userTags и localStorage СРАЗУ
-     if(!userTags.includes(it.t)){userTags.push(it.t); lsSet(LS_TAGS,userTags);}
+     // Делаем активным локально + гарантированно фиксируем в базе через deep-link
      userActive=info.nm;
      lsSet(LS_ACTIVE,info.nm);
-     tagsCount.textContent=userTags.length+'/'+TOTAL_TAGS;
      showQuickToast('✅ Тег '+info.nm+' надет!');
      overlay.classList.remove('show');
-     // Через 800мс переходим по deep-link (Web App закроется)
-     setTimeout(()=>{
-       if(tg&&tg.close) tg.close();
-       openTelegram(claimUrl);
-     }, 800);
+     setTimeout(()=>{ if(tg&&tg.close) tg.close(); openTelegram(wearUrl); }, 600);
    };
+   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
  }
  overlay.classList.add('show');
 }
