@@ -34,8 +34,10 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 .open-btn:active{transform:scale(.94)}
 .open-btn:disabled{opacity:.5;cursor:not-allowed}
 .legend{margin-top:16px;width:100%;max-width:420px;background:rgba(255,255,255,.06);border-radius:16px;padding:12px 14px}
-.legend-item{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px}
-.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.legend-item{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:12px;line-height:1.4}
+.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.legend-item .lg-pct{color:#ffd700;font-weight:800}
+.legend-item .lg-tags{color:#b8a5d9;font-size:11px}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;overflow-y:auto}
 .overlay.show{display:flex}
 .result-box{background:linear-gradient(135deg,#2d1b4e,#12081f);border:2px solid #ffd700;border-radius:24px;padding:26px 24px;text-align:center;max-width:320px;width:100%}
@@ -76,14 +78,12 @@ h1{font-size:22px;font-weight:800;color:#ffd700;text-shadow:0 2px 14px rgba(255,
 .tag-item .em{font-size:32px;margin-bottom:4px}
 .tag-item .nm{font-size:12px;font-weight:700;margin-bottom:2px}
 .tag-item .rar-label{font-size:10px;color:var(--rar,#999);font-weight:600}
-.tags-empty{text-align:center;color:#b8a5d9;padding:40px 20px;font-size:14px}
-.tags-empty-icon{font-size:50px;margin-bottom:12px;opacity:.5}
 @keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,20px)}20%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-20px)}}
 </style>
 </head>
 <body>
 <h1>🎰 МЕМТОП КЕЙС</h1>
-<div class="sub">Открытие как в CS2 · v22</div>
+<div class="sub">Открытие как в CS2 · v23</div>
 <div class="linkwarn" id="linkWarn">⚠️ Рулетка открыта НЕ из бота! Закрой это окно и открой рулетку кнопкой 🎰 РУЛЕТКА внутри бота.</div>
 <div class="coins">🪙 Топикоинов: <span id="coins">0</span></div>
 <button class="tags-btn" id="tagsBtn">🏷 МОИ ТЕГИ (<span id="tagsCount">0/11</span>)</button>
@@ -146,60 +146,57 @@ const sp=new URLSearchParams(location.search);
 let userCoins=parseInt(sp.get('c')||'0',10)||0;
 let userTags=(sp.get('tags')||'').split(',').filter(x=>x.length>0);
 let userActive=decodeURIComponent(sp.get('active')||'');
-
-// Объединяем URL + localStorage
 const lsTags=lsGet(LS_TAGS,[]);
 lsTags.forEach(t=>{if(!userTags.includes(t))userTags.push(t);});
 lsSet(LS_TAGS,userTags);
 const lsActive=lsGet(LS_ACTIVE,'');
 if(!userActive && lsActive) userActive=lsActive;
 if(userActive && !lsActive) lsSet(LS_ACTIVE,userActive);
-
 document.getElementById('coins').textContent=userCoins;
 
-const TAG_INFO={
-  tag_vip:{em:'💎',nm:'VIP',rar:'legendary',label:'🔴 Легендарный',c:'#eb4b4b'},
-  tag_pepe:{em:'🐸',nm:'Пепе',rar:'rare',label:'🟣 Редкий',c:'#8847ff'},
-  tag_joker:{em:'🃏',nm:'Джокер',rar:'rare',label:'🟣 Редкий',c:'#8847ff'},
-  tag_dino:{em:'🦖',nm:'Дино',rar:'rare',label:'🟣 Редкий',c:'#8847ff'},
-  tag_obereg:{em:'🧿',nm:'Оберег',rar:'rare',label:'🟣 Редкий',c:'#8847ff'},
-  tag_lucky:{em:'🍀',nm:'Счастливчик',rar:'common',label:'🔵 Обычный',c:'#4b69ff'},
-  tag_syrok:{em:'🧀',nm:'Сырок',rar:'common',label:'🔵 Обычный',c:'#4b69ff'},
-  tag_medved:{em:'🐻',nm:'Медведь',rar:'common',label:'🔵 Обычный',c:'#4b69ff'},
-  tag_temny:{em:'🌚',nm:'Тёмный',rar:'common',label:'🔵 Обычный',c:'#4b69ff'},
-  tag_turbo:{em:'🐢',nm:'Турбо',rar:'common',label:'🔵 Обычный',c:'#4b69ff'},
-  tag_pchela:{em:'🐝',nm:'Пчела',rar:'common',label:'🔵 Обычный',c:'#4b69ff'},
+// ═══════════ КАТЕГОРИИ И ШАНСЫ (сумма = 100%) ═══════════
+const ITEM_META={
+ coin:{em:'🪙',nm:'10 Топикоинов'},
+ nothing:{em:'💨',nm:'Пусто'},
+ tag_vip:{em:'💎',nm:'VIP'},
+ tag_pepe:{em:'🐸',nm:'Пепе'},
+ tag_joker:{em:'🃏',nm:'Джокер'},
+ tag_dino:{em:'🦖',nm:'Дино'},
+ tag_obereg:{em:'🧿',nm:'Оберег'},
+ tag_lucky:{em:'🍀',nm:'Счастливчик'},
+ tag_syrok:{em:'🧀',nm:'Сырок'},
+ tag_medved:{em:'🐻',nm:'Медведь'},
+ tag_temny:{em:'🌚',nm:'Тёмный'},
+ tag_turbo:{em:'🐢',nm:'Турбо'},
+ tag_pchela:{em:'🐝',nm:'Пчела'},
 };
+const CAT_DEF={
+ coin:     {pct:5,  label:'🪙 Топикоины',  c:'#ffd700', keys:['coin']},
+ legendary:{pct:5,  label:'🔴 Легендарный', c:'#eb4b4b', keys:['tag_vip']},
+ epic:     {pct:20, label:'🟣 Эпический',   c:'#8847ff', keys:['tag_pepe','tag_joker','tag_dino','tag_obereg']},
+ rare:     {pct:50, label:'🔵 Редкий',      c:'#4b69ff', keys:['tag_lucky','tag_syrok','tag_medved','tag_temny','tag_turbo','tag_pchela']},
+ nothing:  {pct:20, label:'💨 Пусто',       c:'#555555', keys:['nothing']},
+};
+const ORDER=['coin','legendary','epic','rare','nothing'];
+function catOf(t){for(const k of ORDER){if(CAT_DEF[k].keys.includes(t))return k;}return 'nothing';}
+function itemObj(t){const m=ITEM_META[t];return {t,em:m.em,nm:m.nm,c:CAT_DEF[catOf(t)].c,label:CAT_DEF[catOf(t)].label};}
+
+// TAG_INFO только для тегов (для списка «МОИ ТЕГИ»)
+const TAG_INFO={};
+ORDER.forEach(k=>{ if(k==='coin'||k==='nothing')return; CAT_DEF[k].keys.forEach(t=>{ TAG_INFO[t]={em:ITEM_META[t].em,nm:ITEM_META[t].nm,label:CAT_DEF[k].label,c:CAT_DEF[k].c}; }); });
 const TOTAL_TAGS=Object.keys(TAG_INFO).length;
 document.getElementById('tagsCount').textContent=userTags.length+'/'+TOTAL_TAGS;
 
-const RAR={
- gold:{c:'#ffd700',label:'🌟 Золотой'},
- legendary:{c:'#eb4b4b',label:'🔴 Легендарный'},
- rare:{c:'#8847ff',label:'🟣 Редкий'},
- common:{c:'#4b69ff',label:'🔵 Обычный'},
- none:{c:'#555555',label:''}
-};
+// Ровный выбор предмета по процентам категории
+function pickByCat(){
+  const r=Math.random()*100; let a=0;
+  for(const k of ORDER){ a+=CAT_DEF[k].pct; if(r<a){const arr=CAT_DEF[k].keys;return itemObj(arr[Math.floor(Math.random()*arr.length)]);} }
+  return itemObj('nothing');
+}
+const roll=pickByCat;       // выигрышный предмет
+const fillItem=pickByCat;   // случайная карточка в ленте
 
-const ITEMS=[
- {t:'coin',em:'🪙',nm:'10 Топикоинов',rar:'gold',ch:5},
- {t:'tag_vip',em:'💎',nm:'VIP',rar:'legendary',ch:5},
- {t:'tag_pepe',em:'🐸',nm:'Пепе',rar:'rare',ch:5},
- {t:'tag_joker',em:'🃏',nm:'Джокер',rar:'rare',ch:5},
- {t:'tag_dino',em:'🦖',nm:'Дино',rar:'rare',ch:5},
- {t:'tag_obereg',em:'🧿',nm:'Оберег',rar:'rare',ch:5},
- {t:'tag_lucky',em:'🍀',nm:'Счастливчик',rar:'common',ch:5},
- {t:'tag_syrok',em:'🧀',nm:'Сырок',rar:'common',ch:5},
- {t:'tag_medved',em:'🐻',nm:'Медведь',rar:'common',ch:5},
- {t:'tag_temny',em:'🌚',nm:'Тёмный',rar:'common',ch:5},
- {t:'tag_turbo',em:'🐢',nm:'Турбо',rar:'common',ch:5},
- {t:'tag_pchela',em:'🐝',nm:'Пчела',rar:'common',ch:5},
- {t:'nothing',em:'💨',nm:'Пусто',rar:'none',ch:40}
-];
-
-function roll(){const r=Math.random()*100;let a=0;for(const it of ITEMS){a+=it.ch;if(r<a)return it;}return ITEMS[ITEMS.length-1];}
-function fillIdx(){const pool=[];ITEMS.forEach((it,i)=>{for(let k=0;k<it.ch;k++)pool.push(i);});return pool[Math.floor(Math.random()*pool.length)];}
-function makeCard(it){const c=document.createElement('div');c.className='card';c.style.setProperty('--rar',RAR[it.rar].c);
+function makeCard(it){const c=document.createElement('div');c.className='card';c.style.setProperty('--rar',it.c);
  c.innerHTML='<div class="em">'+it.em+'</div><div class="nm">'+it.nm+'</div><div class="rar"></div>';return c;}
 
 const strip=document.getElementById('strip'),openBtn=document.getElementById('openBtn'),
@@ -213,14 +210,16 @@ const strip=document.getElementById('strip'),openBtn=document.getElementById('op
 
 const CARD_W=120,REEL_LEN=60,WIN_INDEX=50;
 let spinning=false;
-for(let i=0;i<REEL_LEN;i++)strip.appendChild(makeCard(ITEMS[fillIdx()]));
+for(let i=0;i<REEL_LEN;i++)strip.appendChild(makeCard(fillItem()));
 
+// Легенда по категориям
 const legend=document.getElementById('legend');
-ITEMS.forEach(it=>{const d=document.createElement('div');d.className='legend-item';
- d.innerHTML='<div class="dot" style="background:'+RAR[it.rar].c+'"></div><b>'+it.ch+'%</b> — '+it.em+' '+it.nm;
- legend.appendChild(d);});
+ORDER.forEach(k=>{const d=CAT_DEF[k];
+ const ems=d.keys.map(t=>ITEM_META[t].em).join(' ');
+ const row=document.createElement('div');row.className='legend-item';
+ row.innerHTML='<div class="dot" style="background:'+d.c+'"></div><div><span class="lg-pct">'+d.pct+'%</span> — '+d.label+'<div class="lg-tags">'+ems+'</div></div>';
+ legend.appendChild(row);});
 
-// Синхронизация при возврате в Web App
 document.addEventListener('visibilitychange', ()=>{
   if(!document.hidden){
     const freshTags=lsGet(LS_TAGS,[]);
@@ -235,23 +234,14 @@ tagsBtn.addEventListener('click',openTagsModal);
 tagsModalClose.addEventListener('click',()=>tagsModal.classList.remove('show'));
 backBtn.addEventListener('click',()=>{overlay.classList.remove('show');});
 
-function openTelegram(url){
-  if(tg&&tg.openTelegramLink){tg.openTelegramLink(url);}
-  else{window.location.href=url;}
-}
-
-function openTagsModal(){
-  renderTagsGrid();
-  tagsModal.classList.add('show');
-}
+function openTelegram(url){ if(tg&&tg.openTelegramLink){tg.openTelegramLink(url);} else{window.location.href=url;} }
+function openTagsModal(){ renderTagsGrid(); tagsModal.classList.add('show'); }
 
 function renderTagsGrid(){
-  // Каждый раз читаем свежие данные из localStorage
   const freshTags=lsGet(LS_TAGS,[]);
   freshTags.forEach(t=>{if(!userTags.includes(t))userTags.push(t);});
   const freshActive=lsGet(LS_ACTIVE,'');
   if(freshActive) userActive=freshActive;
-
   tagsGrid.innerHTML='';
   tagsActiveName.textContent=userActive||'— нет активного тега —';
   const got=userTags.length;
@@ -271,27 +261,20 @@ function renderTagsGrid(){
 }
 
 async function selectTag(tagType,tagText){
-  if(userActive===tagText){
-    if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('warning');
-    return;
-  }
-  const nonce=randNonce();
-  const sig=await hmacSign(tagType+"_"+nonce);
-  const claimUrl="https://t.me/"+BOT_USERNAME+"?start=claim_"+tagType+"_"+nonce+"_"+sig;
-  userActive=tagText;
-  lsSet(LS_ACTIVE,tagText);
-  renderTagsGrid();
-  tagsModal.classList.remove('show');
+  if(userActive===tagText){ if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('warning'); return; }
+  let url='';
+  try{ const n=randNonce(); const s=await hmacSign(tagType+"_"+n); url="https://t.me/"+BOT_USERNAME+"?start=claim_"+tagType+"_"+n+"_"+s; }catch(e){}
+  userActive=tagText; lsSet(LS_ACTIVE,tagText);
+  renderTagsGrid(); tagsModal.classList.remove('show');
   showQuickToast('✅ '+tagText+' активирован!');
-  openTelegram(claimUrl);
+  if(url){ setTimeout(()=>{ if(tg&&tg.close)tg.close(); openTelegram(url); },500); }
+  else { showQuickToast('⚠️ Обнови Telegram и повтори'); }
 }
 
 function showQuickToast(text){
-  const toast=document.createElement('div');
-  toast.textContent=text;
+  const toast=document.createElement('div');toast.textContent=text;
   toast.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#ffd700;color:#12081f;padding:10px 20px;border-radius:20px;font-weight:700;z-index:100;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:fadeInOut 2s ease';
-  document.body.appendChild(toast);
-  setTimeout(()=>toast.remove(),2000);
+  document.body.appendChild(toast);setTimeout(()=>toast.remove(),2000);
 }
 
 openBtn.addEventListener('click',()=>{
@@ -300,7 +283,7 @@ openBtn.addEventListener('click',()=>{
  caseEl.classList.add('shaking');setTimeout(()=>caseEl.classList.remove('shaking'),650);
  const winner=roll();
  strip.style.transition='none';strip.style.transform='translateX(0)';strip.innerHTML='';
- for(let i=0;i<REEL_LEN;i++)strip.appendChild(makeCard(i===WIN_INDEX?winner:ITEMS[fillIdx()]));
+ for(let i=0;i<REEL_LEN;i++)strip.appendChild(makeCard(i===WIN_INDEX?winner:fillItem()));
  void strip.offsetWidth;
  const boxW=document.querySelector('.reel-box').offsetWidth;
  const jitter=(Math.random()*2-1)*(CARD_W/2-14);
@@ -320,33 +303,26 @@ async function showResult(it){
  document.getElementById('rEmoji').textContent=it.em;
  document.getElementById('rTitle').textContent=it.nm;
  const r=document.getElementById('rRar');
- r.textContent=RAR[it.rar].label;
- r.style.color=RAR[it.rar].c;
-
- const oldForm=document.getElementById('coinForm');
- if(oldForm) oldForm.remove();
+ r.textContent=(it.t==='nothing')?'':it.label;
+ r.style.color=it.c;
+ const oldForm=document.getElementById('coinForm'); if(oldForm) oldForm.remove();
 
  if(it.t==='nothing'){
    document.getElementById('rText').textContent='Ничего не выпало. Попробуй ещё раз!';
-   claimBtn.style.display='none';
-   againBtn.style.display='block';
-   backBtn.style.display='block';
+   claimBtn.style.display='none'; againBtn.style.display='block'; backBtn.style.display='block';
    if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('warning');
  } else if(it.t==='coin'){
    document.getElementById('rText').innerHTML='🎉 <b style="color:#ffd700">Поздравляю!</b><br>Введите свои данные для вручения приза';
-   claimBtn.style.display='none';
-   againBtn.style.display='none';
-   backBtn.style.display='none';
-   const form=document.createElement('div');
-   form.className='coin-form';form.id='coinForm';
+   claimBtn.style.display='none'; againBtn.style.display='none'; backBtn.style.display='none';
+   const form=document.createElement('div');form.className='coin-form';form.id='coinForm';
    form.innerHTML='<div class="coin-form-error" id="coinFormError"></div>'+
      '<input type="text" id="fioInput" placeholder="ФИО (например: Иванов Иван Иванович)" maxlength="100">'+
      '<input type="text" id="groupInput" placeholder="Группа (например: ИС-21-1)" maxlength="50">'+
      '<button class="coin-submit-btn" id="coinSubmitBtn">📨 Отправить владельцу</button>'+
      '<a class="coin-reserve-btn" id="coinReserveBtn" href="#" target="_blank">⚠️ Если не получилось — написать вручную</a>';
    document.querySelector('.result-box').appendChild(form);
-   const nonce=randNonce();
-   const sig=await hmacSign(it.t+"_"+nonce);
+   let nonce='',sig='';
+   try{ nonce=randNonce(); sig=await hmacSign(it.t+"_"+nonce); }catch(e){}
    document.getElementById('coinSubmitBtn').addEventListener('click',async ()=>{
      const fio=document.getElementById('fioInput').value.trim();
      const group=document.getElementById('groupInput').value.trim();
@@ -358,7 +334,7 @@ async function showResult(it){
      document.getElementById('coinSubmitBtn').disabled=true;
      document.getElementById('coinSubmitBtn').textContent='⏳ Отправка...';
      try{
-       if(tg&&tg.sendData){
+       if(tg&&tg.sendData&&nonce&&sig){
          tg.sendData(JSON.stringify({type:'coin',fio:fio,group:group,nonce:nonce,sig:sig}));
          showQuickToast('✅ Данные отправлены!');
          setTimeout(()=>{if(tg&&tg.close)tg.close();},1500);
@@ -379,38 +355,30 @@ async function showResult(it){
    document.getElementById('coinReserveBtn').href='https://t.me/share/url?url=&text='+encodeURIComponent(reserveMsg0);
    if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
  } else {
-   // ===== ТЕГ: АВТО-НАЧИСЛЕНИЕ В КОЛЛЕКЦИЮ В МОМЕНТ ВЫПАДЕНИЯ =====
+   // ===== ТЕГ: СИНХРОННО В КОЛЛЕКЦИЮ СРАЗУ (главный фикс) =====
    const info=TAG_INFO[it.t];
-
-   // Два НЕЗАВИСИМЫХ nonce: один для фоновой синхронизации, второй для ссылки «Надеть»
-   const nonceAuto=randNonce();
-   const sigAuto=await hmacSign(it.t+"_"+nonceAuto);
-   const nonceWear=randNonce();
-   const sigWear=await hmacSign(it.t+"_"+nonceWear);
-   const wearUrl="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nonceWear+"_"+sigWear;
-
-   // 1) Мгновенно добавляем в локальную коллекцию (тег появится в списке СРАЗУ, даже после «Назад»)
-   if(!userTags.includes(it.t)){ userTags.push(it.t); lsSet(LS_TAGS,userTags); }
+   if(!userTags.includes(it.t)){ userTags.push(it.t); lsSet(LS_TAGS,userTags); }   // ← ДО await
    tagsCount.textContent=userTags.length+'/'+TOTAL_TAGS;
 
-   // 2) Фоновая попытка записать в базу бота без перехода в чат
-   try{ if(tg&&tg.sendData) tg.sendData(JSON.stringify({type:it.t,nonce:nonceAuto,sig:sigAuto})); }catch(e){}
+   let wearUrl='',autoOk=false;
+   try{
+     const nA=randNonce(),sA=await hmacSign(it.t+"_"+nA);
+     try{ if(tg&&tg.sendData){ tg.sendData(JSON.stringify({type:it.t,nonce:nA,sig:sA})); autoOk=true; } }catch(e){}
+     const nW=randNonce(),sW=await hmacSign(it.t+"_"+nW);
+     wearUrl="https://t.me/"+BOT_USERNAME+"?start=claim_"+it.t+"_"+nW+"_"+sW;
+   }catch(e){}
 
-   // 3) Показываем окно результата
    document.getElementById('rText').textContent='🎉 Тег выбит и добавлен в коллекцию! Нажми «Надеть», чтобы показать его рядом с именем.';
-   claimBtn.style.display='block';
-   claimBtn.textContent='🎽 Надеть';
-   againBtn.style.display='block';
-   backBtn.style.display='block';
-   claimBtn.href=wearUrl;
+   claimBtn.style.display='block'; claimBtn.textContent='🎽 Надеть';
+   againBtn.style.display='block'; backBtn.style.display='block';
+   if(wearUrl) claimBtn.href=wearUrl;
    claimBtn.onclick=(e)=>{
      e.preventDefault();
-     // Делаем активным локально + гарантированно фиксируем в базе через deep-link
-     userActive=info.nm;
-     lsSet(LS_ACTIVE,info.nm);
+     userActive=info.nm; lsSet(LS_ACTIVE,info.nm);
      showQuickToast('✅ Тег '+info.nm+' надет!');
      overlay.classList.remove('show');
-     setTimeout(()=>{ if(tg&&tg.close) tg.close(); openTelegram(wearUrl); }, 600);
+     if(wearUrl){ setTimeout(()=>{ if(tg&&tg.close)tg.close(); openTelegram(wearUrl); },600); }
+     else { showQuickToast('⚠️ Обнови Telegram и нажми «Надеть» ещё раз'); }
    };
    if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
  }
