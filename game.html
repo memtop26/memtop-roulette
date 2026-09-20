@@ -78,19 +78,35 @@ body{
 .actions .btn{flex:1 1 auto;min-width:120px}
 .empty{text-align:center;padding:22px 10px;color:var(--muted)}
 .empty-emoji{font-size:46px;margin-bottom:8px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translate3d(-50%,24px,0);background:rgba(20,10,35,.94);border:1px solid rgba(255,255,255,.14);color:#fff;padding:11px 16px;border-radius:16px;font-size:13px;font-weight:750;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:80;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate3d(-50%,24px,0);background:rgba(20,10,35,.94);border:1px solid rgba(255,255,255,.14);color:#fff;padding:11px 16px;border-radius:16px;font-size:13px;font-weight:750;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:120;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translate3d(-50%,0,0)}
-.loading{position:fixed;inset:0;background:rgba(8,4,16,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:90}
+.loading{position:fixed;inset:0;background:rgba(8,4,16,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:130}
 .spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--gold);border-right-color:var(--accent);animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:13px;font-weight:800;opacity:.9}
 .warn{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);color:#ffd7d7;padding:11px;border-radius:14px;font-size:12px;text-align:center}
-.startover{position:fixed;inset:0;background:rgba(8,4,16,.92);z-index:95;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
+.startover{position:fixed;inset:0;background:rgba(8,4,16,.92);z-index:140;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
 .startover.show{display:flex}
 .startover .big-emoji{font-size:72px;animation:bounce 1.4s ease-in-out infinite}
 @keyframes bounce{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-14px,0)}}
 .startover h2{font-size:24px;font-weight:950}
 .startover p{color:var(--muted);font-size:14px;line-height:1.5;max-width:320px}
+
+/* Модалка списка приглашения */
+.modal{position:fixed;inset:0;background:rgba(8,4,16,.82);z-index:110;display:none;align-items:flex-end;justify-content:center;padding:0}
+.modal.show{display:flex}
+.modal-card{width:100%;max-width:560px;background:linear-gradient(180deg,#241436,#160b26);border:1px solid rgba(139,61,255,.4);border-radius:24px 24px 0 0;padding:18px 16px 26px;max-height:78vh;display:flex;flex-direction:column;animation:sheetUp .3s ease both}
+@keyframes sheetUp{from{transform:translate3d(0,40px,0);opacity:0}to{transform:translate3d(0,0,0);opacity:1}}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.modal-title{font-size:17px;font-weight:950;color:var(--gold);display:flex;align-items:center;gap:8px}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.4}
+.modal-close{background:rgba(255,255,255,.08);border:1px solid var(--border);color:#fff;font-size:20px;line-height:1;width:34px;height:34px;border-radius:12px;cursor:pointer}
+.modal-body{overflow-y:auto;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch}
+.inv-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:16px;padding:11px 12px;animation:popIn .25s ease both}
+.inv-nick{font-size:14px;font-weight:800;color:#e9dcff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inv-row .btn{flex:0 0 auto}
+.inv-empty{text-align:center;padding:26px 12px;color:var(--muted);font-size:13px;line-height:1.5}
+.inv-empty .empty-emoji{font-size:42px}
 @media (max-width:380px){.hero h1{font-size:24px}.create-grid{grid-template-columns:1fr}.code-input{letter-spacing:4px;font-size:18px}.actions .btn{min-width:100px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.orbit{display:none}}
 </style>
@@ -111,7 +127,7 @@ body{
 
   <section class="hero">
     <h1>Собери друзей<br>и посмейся</h1>
-    <p>Создавай комнаты, приглашай друзей, отвечай на вопросы и голосуй за самые смешные ответы.</p>
+    <p>Создавай комнаты, приглашай друзей прямо здесь, отвечай на вопросы и голосуй за самые смешные ответы.</p>
   </section>
 
   <section id="mySection" class="section hidden"></section>
@@ -137,6 +153,18 @@ body{
     <div id="lobbiesList" class="lobbies"></div>
   </section>
 </main>
+
+<!-- Модалка списка приглашения -->
+<div id="inviteModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">📨 Кого пригласить</div>
+      <button class="modal-close" id="inviteClose">×</button>
+    </div>
+    <div class="modal-sub">Приглашение придёт игроку в личку — он нажмёт «Принять» и попадёт в твою комнату.</div>
+    <div class="modal-body" id="inviteList"></div>
+  </div>
+</div>
 
 <div id="toast" class="toast"></div>
 <div id="loading" class="loading hidden">
@@ -171,7 +199,8 @@ const state={
   min:parseInt(sp.get('min')||'3',10)||3,
   max:parseInt(sp.get('max')||'12',10)||12,
   lobbies:parseJSON(sp.get('lobbies'),[]),
-  my:parseJSON(sp.get('my'),null)
+  my:parseJSON(sp.get('my'),null),
+  invites:parseJSON(sp.get('invites'),[])
 };
 if(state.my){ state.my.isHost=(Number(state.my.host)===Number(myUid)); }
 
@@ -180,14 +209,14 @@ function modeLabel(m){return m==='media'?'🖼 МЕМ':'📝 ТЕКСТ';}
 function modeBadge(m){return m==='media'?'badge mem':'badge text';}
 function generateCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
 
-function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2000);}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);}
 function showLoading(t){document.getElementById('loadingText').textContent=t||'Отправляю...';document.getElementById('loading').classList.remove('hidden');}
 function hideLoading(){document.getElementById('loading').classList.add('hidden');}
 function haptic(t){try{if(tg&&tg.HapticFeedback){if(t==='success')tg.HapticFeedback.notificationOccurred('success');else if(t==='warning')tg.HapticFeedback.notificationOccurred('warning');else tg.HapticFeedback.impactOccurred(t||'light');}}catch(e){}}
 
 function sendAction(type,payload,onSuccess){
   if(!linked){toast('⚠️ Открой через бота');return;}
-  const labels={game_create:'Создаю комнату...',game_join:'Вхожу в игру...',game_leave:'Выхожу...',game_start:'Запускаю...',game_invite:'Готовлю приглашения...'};
+  const labels={game_create:'Создаю комнату...',game_join:'Вхожу в игру...',game_leave:'Выхожу...',game_start:'Запускаю...',game_invite_one:'Отправляю приглашение...'};
   showLoading(labels[type]);haptic('light');
   try{
     tg.sendData(JSON.stringify({type,...payload}));
@@ -197,16 +226,8 @@ function sendAction(type,payload,onSuccess){
 
 function copyCode(code){
   const done=()=>toast('📋 Код '+code+' скопирован');
-  try{
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(done).catch(fallback);}
-    else fallback();
-  }catch(e){fallback();}
-  function fallback(){
-    try{
-      const ta=document.createElement('textarea');ta.value=code;ta.style.position='fixed';ta.style.opacity='0';
-      document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
-    }catch(e){toast('Код: '+code);}
-  }
+  function fallback(){try{const ta=document.createElement('textarea');ta.value=code;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}catch(e){toast('Код: '+code);}}
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(done).catch(fallback);}else fallback();}catch(e){fallback();}
 }
 
 function renderUser(){
@@ -220,11 +241,8 @@ function renderMy(){
   const m=state.my;sec.classList.remove('hidden');
   const playersHtml=(m.players||[]).map(p=>`<span class="player-pill">${esc(p)}</span>`).join('')+
     (m.more>0?`<span class="player-pill more">+${m.more}</span>`:'');
-
   const enough=(m.count>=m.min);
   const need=Math.max(0,m.min-m.count);
-
-  // Кнопки зависимости от роли
   let startBtn='';
   if(m.isHost){
     startBtn = enough
@@ -232,17 +250,13 @@ function renderMy(){
       : `<button class="btn ghost" disabled>⏳ Нужно ещё ${need}</button>`;
   }
   const inviteBtn = m.isHost
-    ? `<button class="btn purple" data-invite="${esc(m.code)}">📨 Пригласить</button>`
+    ? `<button class="btn purple" data-invite-open="1">📨 Пригласить</button>`
     : '';
-  const waitBtn = (!m.isHost)
-    ? `<button class="btn ghost" disabled>🕒 Ждём хоста…</button>`
-    : '';
-
+  const waitBtn = (!m.isHost) ? `<button class="btn ghost" disabled>🕒 Ждём хоста…</button>` : '';
   const hint = m.isHost
     ? (enough ? `Всё готово — можно начинать! Игроков: <b>${m.count}/${m.max}</b>`
-              : `Пригласи ещё <b>${need}</b> игрок(ов), чтобы запустить игру.`)
+              : `Пригласи ещё <b>${need}</b> игрок(ов) кнопкой «📨 Пригласить».`)
     : `Хост: <b>${esc(m.host_nick)}</b>. Жди старта.`;
-
   sec.innerHTML=`
     <h2>🟢 Твоя комната</h2>
     <div class="my-card">
@@ -278,6 +292,22 @@ function renderLobbies(){
   }).join('');
 }
 
+// ===== Модалка списка приглашения (данные уже в URL) =====
+function renderInviteList(){
+  const box=document.getElementById('inviteList');
+  if(!state.invites||state.invites.length===0){
+    box.innerHTML=`<div class="inv-empty"><div class="empty-emoji">🫥</div>Пока некого пригласить.<br>Все доступные игроки уже в играх или появятся позже — обнови приложение кнопкой 🎮 ИГРАТЬ в боте.</div>`;
+    return;
+  }
+  box.innerHTML=state.invites.map((p,i)=>`
+    <div class="inv-row" style="animation-delay:${i*40}ms">
+      <span class="inv-nick">${esc(p.nick)}</span>
+      <button class="btn purple sm" data-inv="${p.id}">📨 Пригласить</button>
+    </div>`).join('');
+}
+function openInviteModal(){renderInviteList();document.getElementById('inviteModal').classList.add('show');}
+function closeInviteModal(){document.getElementById('inviteModal').classList.remove('show');}
+
 function initOrbit(){
   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const orbit=document.getElementById('orbit');
@@ -291,7 +321,7 @@ function initOrbit(){
     orbit.appendChild(s);}
 }
 
-// ===== Локальные переходы состояний (без закрытия приложения) =====
+// ===== Локальные переходы состояний =====
 function localCreate(mode){
   const code=generateCode();
   state.my={code,host:myUid,host_nick:state.nick,count:1,max:state.max,min:state.min,
@@ -334,12 +364,28 @@ document.getElementById('lobbiesList').addEventListener('click',e=>{
 document.getElementById('mySection').addEventListener('click',e=>{
   const copy=e.target.closest('[data-copy]');
   if(copy){copyCode(copy.dataset.copy);return;}
-  const invite=e.target.closest('[data-invite]');
-  if(invite){sendAction('game_invite',{code:invite.dataset.invite},()=>toast('📨 Список игроков для приглашения — в чате бота'));return;}
+  if(e.target.closest('[data-invite-open]')){openInviteModal();return;}
   const leave=e.target.closest('[data-leave]');
   if(leave){localLeave();sendAction('game_leave',{code:leave.dataset.leave});return;}
   const start=e.target.closest('[data-start]');
   if(start){sendAction('game_start',{code:start.dataset.start},localStart);}});
+
+// Клик по игроку в модалке -> отправить приглашение
+document.getElementById('inviteList').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-inv]');if(!btn||btn.disabled||!state.my)return;
+  const target=btn.dataset.inv;
+  const nickEl=btn.parentElement.querySelector('.inv-nick');
+  const nick=nickEl?nickEl.textContent:'';
+  btn.disabled=true;btn.textContent='⏳...';
+  sendAction('game_invite_one',{code:state.my.code,target:Number(target)},()=>{
+    state.invites=state.invites.filter(x=>String(x.id)!==String(target));
+    renderInviteList();
+    toast('✉️ Приглашение отправлено: '+nick);
+  });
+});
+
+document.getElementById('inviteClose').addEventListener('click',closeInviteModal);
+document.getElementById('inviteModal').addEventListener('click',e=>{if(e.target.id==='inviteModal')closeInviteModal();});
 
 document.getElementById('startClose').addEventListener('click',()=>{
   document.getElementById('startOver').classList.remove('show');
