@@ -18,50 +18,32 @@ html,body{height:100%}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   color:var(--text);
-  /* СТАТИЧНЫЙ градиент — без animation background-position (это главная причина лагов) */
   background:linear-gradient(160deg,var(--bg3),var(--bg2) 45%,var(--bg1));
   background-attachment:fixed;
-  min-height:100vh;overflow-x:hidden;user-select:none;
-  -webkit-font-smoothing:antialiased;
+  min-height:100vh;overflow-x:hidden;user-select:none;-webkit-font-smoothing:antialiased;
 }
-/* Частицы: мало, без blur, только GPU-свойства */
 .orbit{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;contain:strict}
-.orbit span{
-  position:absolute;bottom:-60px;opacity:.10;will-change:transform,opacity;
-  animation:floatUp linear infinite;
-}
-@keyframes floatUp{
-  0%{transform:translate3d(0,0,0) rotate(0);opacity:0}
-  12%{opacity:.14}
-  100%{transform:translate3d(0,-115vh,0) rotate(180deg);opacity:0}
-}
-.wrap{position:relative;z-index:2;width:100%;max-width:560px;margin:0 auto;
-  padding:16px 14px 90px;display:flex;flex-direction:column;gap:14px}
+.orbit span{position:absolute;bottom:-60px;opacity:.10;will-change:transform,opacity;animation:floatUp linear infinite}
+@keyframes floatUp{0%{transform:translate3d(0,0,0) rotate(0);opacity:0}12%{opacity:.14}100%{transform:translate3d(0,-115vh,0) rotate(180deg);opacity:0}}
+.wrap{position:relative;z-index:2;width:100%;max-width:560px;margin:0 auto;padding:16px 14px 90px;display:flex;flex-direction:column;gap:14px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.brand{font-size:18px;font-weight:900;letter-spacing:.5px;color:var(--gold);
-  text-shadow:0 2px 10px rgba(255,215,0,.25)}
-.userchip{display:flex;align-items:center;gap:8px;background:var(--card);
-  border:1px solid var(--border);border-radius:999px;padding:7px 12px;
-  font-size:12px;font-weight:700;max-width:58%}
+.brand{font-size:18px;font-weight:900;letter-spacing:.5px;color:var(--gold);text-shadow:0 2px 10px rgba(255,215,0,.25)}
+.userchip{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;max-width:58%}
 .userchip .nick{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
 .userchip .coins{color:var(--gold)}
-.hero{position:relative;border-radius:24px;padding:22px 18px;text-align:center;
-  background:linear-gradient(135deg,rgba(139,61,255,.18),rgba(75,105,255,.10),rgba(255,215,0,.06));
-  border:1px solid rgba(139,61,255,.35);overflow:hidden}
+.hero{position:relative;border-radius:24px;padding:22px 18px;text-align:center;background:linear-gradient(135deg,rgba(139,61,255,.18),rgba(75,105,255,.10),rgba(255,215,0,.06));border:1px solid rgba(139,61,255,.35);overflow:hidden}
 .hero h1{font-size:28px;line-height:1.08;font-weight:950;margin-bottom:8px}
 .hero p{color:var(--muted);font-size:13px;line-height:1.45}
-.section{background:var(--card);border:1px solid var(--border);border-radius:20px;
-  padding:16px;animation:slideUp .35s ease both}
+.section{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;animation:slideUp .35s ease both}
 @keyframes slideUp{from{opacity:0;transform:translate3d(0,12px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
 .section h2{font-size:15px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .hidden{display:none!important}
 .create-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn{border:none;outline:none;color:#fff;font-weight:850;border-radius:16px;
-  padding:13px 14px;cursor:pointer;font-size:14px;position:relative;overflow:hidden;
-  transition:transform .12s ease,opacity .2s ease;will-change:transform}
+.btn{border:none;outline:none;color:#fff;font-weight:850;border-radius:16px;padding:13px 14px;cursor:pointer;font-size:14px;position:relative;overflow:hidden;transition:transform .12s ease,opacity .2s ease;will-change:transform}
 .btn:active{transform:scale(.96)}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
 .btn.big{padding:16px 12px;font-size:15px}
+.btn.sm{padding:9px 12px;font-size:12px;border-radius:12px}
 .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2))}
 .btn.purple{background:linear-gradient(135deg,#b06bff,#7a2bff)}
 .btn.gold{background:linear-gradient(135deg,#ffd700,#ffb300);color:#1b1000}
@@ -69,68 +51,48 @@ body{
 .btn.danger{background:linear-gradient(135deg,#e74c3c,#c0392b)}
 .btn.ghost{background:rgba(255,255,255,.07);border:1px solid var(--border)}
 .join-row{display:flex;gap:8px}
-.code-input{flex:1;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--border);
-  color:#fff;border-radius:16px;padding:13px;font-size:20px;font-weight:900;letter-spacing:6px;
-  text-align:center;text-transform:uppercase;outline:none;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+.code-input{flex:1;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--border);color:#fff;border-radius:16px;padding:13px;font-size:20px;font-weight:900;letter-spacing:6px;text-align:center;text-transform:uppercase;outline:none;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
 .code-input:focus{border-color:var(--gold)}
 .code-input::placeholder{color:#7a6a94;letter-spacing:3px;font-size:15px}
 .lobbies{display:flex;flex-direction:column;gap:10px}
-.lobby{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
-  border:1px solid var(--border);border-radius:18px;padding:13px;display:flex;flex-direction:column;gap:8px;
-  animation:popIn .3s ease both;overflow:hidden}
+.lobby{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid var(--border);border-radius:18px;padding:13px;display:flex;flex-direction:column;gap:8px;animation:popIn .3s ease both;overflow:hidden}
 @keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
-.lobby::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:linear-gradient(180deg,var(--accent),var(--gold))}
+.lobby::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),var(--gold))}
 .lobby-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  font-size:18px;font-weight:950;letter-spacing:2px;color:var(--gold)}
-.badge{font-size:10px;font-weight:850;padding:5px 9px;border-radius:999px;
-  background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:18px;font-weight:950;letter-spacing:2px;color:var(--gold)}
+.badge{font-size:10px;font-weight:850;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--muted);white-space:nowrap}
 .badge.mem{color:#b06bff;border-color:rgba(176,107,255,.3)}
 .badge.text{color:#7cc4ff;border-color:rgba(124,196,255,.2)}
 .meta{font-size:12px;color:var(--muted);line-height:1.4}
 .players{display:flex;flex-wrap:wrap;gap:5px}
-.player-pill{font-size:11px;font-weight:750;padding:4px 8px;border-radius:999px;
-  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#e9dcff}
+.player-pill{font-size:11px;font-weight:750;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#e9dcff}
 .player-pill.more{color:var(--muted)}
 .lobby-actions{display:flex;justify-content:flex-end}
-.my-card{background:linear-gradient(135deg,rgba(255,215,0,.10),rgba(139,61,255,.12));
-  border:1px solid rgba(255,215,0,.25);border-radius:20px;padding:14px}
+.my-card{background:linear-gradient(135deg,rgba(255,215,0,.10),rgba(139,61,255,.12));border:1px solid rgba(255,215,0,.25);border-radius:20px;padding:14px}
 .my-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
+.my-code-row{display:flex;align-items:center;gap:8px}
 .live{font-size:11px;font-weight:900;color:#7CFFB2;letter-spacing:.6px}
-.actions{display:flex;gap:8px;margin-top:10px}
-.actions .btn{flex:1}
+.hint{font-size:11px;color:var(--muted);margin-top:6px}
+.hint b{color:var(--gold)}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.actions .btn{flex:1 1 auto;min-width:120px}
 .empty{text-align:center;padding:22px 10px;color:var(--muted)}
 .empty-emoji{font-size:46px;margin-bottom:8px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translate3d(-50%,24px,0);
-  background:rgba(20,10,35,.94);border:1px solid rgba(255,255,255,.14);color:#fff;
-  padding:11px 16px;border-radius:16px;font-size:13px;font-weight:750;opacity:0;
-  pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:80;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate3d(-50%,24px,0);background:rgba(20,10,35,.94);border:1px solid rgba(255,255,255,.14);color:#fff;padding:11px 16px;border-radius:16px;font-size:13px;font-weight:750;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:80;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translate3d(-50%,0,0)}
-.loading{position:fixed;inset:0;background:rgba(8,4,16,.6);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:12px;z-index:90}
-.spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,.12);
-  border-top-color:var(--gold);border-right-color:var(--accent);animation:spin .7s linear infinite}
+.loading{position:fixed;inset:0;background:rgba(8,4,16,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:90}
+.spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--gold);border-right-color:var(--accent);animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:13px;font-weight:800;opacity:.9}
-.warn{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);color:#ffd7d7;
-  padding:11px;border-radius:14px;font-size:12px;text-align:center}
-/* Полноэкранный баннер старта (контролируемое закрытие, не вылет) */
-.startover{position:fixed;inset:0;background:rgba(8,4,16,.92);z-index:95;display:none;
-  flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
+.warn{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);color:#ffd7d7;padding:11px;border-radius:14px;font-size:12px;text-align:center}
+.startover{position:fixed;inset:0;background:rgba(8,4,16,.92);z-index:95;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
 .startover.show{display:flex}
 .startover .big-emoji{font-size:72px;animation:bounce 1.4s ease-in-out infinite}
 @keyframes bounce{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-14px,0)}}
 .startover h2{font-size:24px;font-weight:950}
 .startover p{color:var(--muted);font-size:14px;line-height:1.5;max-width:320px}
-@media (max-width:380px){.hero h1{font-size:24px}.create-grid{grid-template-columns:1fr}
-  .code-input{letter-spacing:4px;font-size:18px}}
-/* Уважение к настройке «уменьшить движение» — отключаем анимации */
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
-  .orbit{display:none}
-}
+@media (max-width:380px){.hero h1{font-size:24px}.create-grid{grid-template-columns:1fr}.code-input{letter-spacing:4px;font-size:18px}.actions .btn{min-width:100px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.orbit{display:none}}
 </style>
 </head>
 <body>
@@ -149,7 +111,7 @@ body{
 
   <section class="hero">
     <h1>Собери друзей<br>и посмейся</h1>
-    <p>Создавай комнаты, заходи по коду, отвечай на вопросы и голосуй за самые смешные ответы.</p>
+    <p>Создавай комнаты, приглашай друзей, отвечай на вопросы и голосуй за самые смешные ответы.</p>
   </section>
 
   <section id="mySection" class="section hidden"></section>
@@ -185,7 +147,7 @@ body{
 <div id="startOver" class="startover">
   <div class="big-emoji">🚀</div>
   <h2>Игра началась!</h2>
-  <p>Вопросы и голосования приходят в личные сообщения бота. Жми «Закрыть» и смотри чат.</p>
+  <p>Вопросы и голосования пришли в личные сообщения каждому игроку. Жми «Закрыть» и смотри чат.</p>
   <button class="btn gold big" id="startClose" style="min-width:180px">ЗАКРЫТЬ</button>
 </div>
 
@@ -211,31 +173,40 @@ const state={
   lobbies:parseJSON(sp.get('lobbies'),[]),
   my:parseJSON(sp.get('my'),null)
 };
-// дополняем my локальными флагами
-if(state.my){ state.my.isHost=(state.my.host===myUid); }
+if(state.my){ state.my.isHost=(Number(state.my.host)===Number(myUid)); }
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function modeLabel(m){return m==='media'?'🖼 МЕМ':'📝 ТЕКСТ';}
 function modeBadge(m){return m==='media'?'badge mem':'badge text';}
 function generateCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
 
-function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');
-  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2000);}
-function showLoading(t){document.getElementById('loadingText').textContent=t||'Отправляю...';
-  document.getElementById('loading').classList.remove('hidden');}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2000);}
+function showLoading(t){document.getElementById('loadingText').textContent=t||'Отправляю...';document.getElementById('loading').classList.remove('hidden');}
 function hideLoading(){document.getElementById('loading').classList.add('hidden');}
-function haptic(t){try{if(tg&&tg.HapticFeedback){if(t==='success')tg.HapticFeedback.notificationOccurred('success');
-  else if(t==='warning')tg.HapticFeedback.notificationOccurred('warning');else tg.HapticFeedback.impactOccurred(t||'light');}}catch(e){}}
+function haptic(t){try{if(tg&&tg.HapticFeedback){if(t==='success')tg.HapticFeedback.notificationOccurred('success');else if(t==='warning')tg.HapticFeedback.notificationOccurred('warning');else tg.HapticFeedback.impactOccurred(t||'light');}}catch(e){}}
 
-// Отправка боту БЕЗ закрытия приложения; onSuccess — локальное обновление экрана
 function sendAction(type,payload,onSuccess){
   if(!linked){toast('⚠️ Открой через бота');return;}
-  const labels={game_create:'Создаю комнату...',game_join:'Вхожу в игру...',game_leave:'Выхожу...',game_start:'Запускаю...'};
+  const labels={game_create:'Создаю комнату...',game_join:'Вхожу в игру...',game_leave:'Выхожу...',game_start:'Запускаю...',game_invite:'Готовлю приглашения...'};
   showLoading(labels[type]);haptic('light');
   try{
     tg.sendData(JSON.stringify({type,...payload}));
     setTimeout(()=>{hideLoading();haptic('success');if(typeof onSuccess==='function')onSuccess();},550);
   }catch(e){hideLoading();haptic('warning');toast('❌ Не удалось отправить');}
+}
+
+function copyCode(code){
+  const done=()=>toast('📋 Код '+code+' скопирован');
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(done).catch(fallback);}
+    else fallback();
+  }catch(e){fallback();}
+  function fallback(){
+    try{
+      const ta=document.createElement('textarea');ta.value=code;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
+    }catch(e){toast('Код: '+code);}
+  }
 }
 
 function renderUser(){
@@ -249,20 +220,43 @@ function renderMy(){
   const m=state.my;sec.classList.remove('hidden');
   const playersHtml=(m.players||[]).map(p=>`<span class="player-pill">${esc(p)}</span>`).join('')+
     (m.more>0?`<span class="player-pill more">+${m.more}</span>`:'');
-  // Кнопка «Начать» активна для хоста; бот сам проверит минимум игроков
-  const startBtn=m.isHost
-    ? `<button class="btn green" data-start="${esc(m.code)}">▶️ Начать</button>`
+
+  const enough=(m.count>=m.min);
+  const need=Math.max(0,m.min-m.count);
+
+  // Кнопки зависимости от роли
+  let startBtn='';
+  if(m.isHost){
+    startBtn = enough
+      ? `<button class="btn green" data-start="${esc(m.code)}">▶️ Начать игру</button>`
+      : `<button class="btn ghost" disabled>⏳ Нужно ещё ${need}</button>`;
+  }
+  const inviteBtn = m.isHost
+    ? `<button class="btn purple" data-invite="${esc(m.code)}">📨 Пригласить</button>`
     : '';
+  const waitBtn = (!m.isHost)
+    ? `<button class="btn ghost" disabled>🕒 Ждём хоста…</button>`
+    : '';
+
+  const hint = m.isHost
+    ? (enough ? `Всё готово — можно начинать! Игроков: <b>${m.count}/${m.max}</b>`
+              : `Пригласи ещё <b>${need}</b> игрок(ов), чтобы запустить игру.`)
+    : `Хост: <b>${esc(m.host_nick)}</b>. Жди старта.`;
+
   sec.innerHTML=`
     <h2>🟢 Твоя комната</h2>
     <div class="my-card">
       <div class="my-head">
         <span class="live">● В ЛОББИ</span>
-        <span class="code">${esc(m.code)}</span>
+        <div class="my-code-row">
+          <span class="code">${esc(m.code)}</span>
+          <button class="btn ghost sm" data-copy="${esc(m.code)}" title="Скопировать код">📋</button>
+        </div>
       </div>
-      <div class="meta">Хост: <b>${esc(m.host_nick)}</b> · Игроков: <b>${m.count}/${m.max}</b> · Режим: <b>${modeLabel(m.mode)}</b></div>
+      <div class="meta">Игроков: <b>${m.count}/${m.max}</b> · Режим: <b>${modeLabel(m.mode)}</b></div>
       <div class="players" style="margin-top:8px">${playersHtml||'<span class="player-pill">Пока один</span>'}</div>
-      <div class="actions">${startBtn}<button class="btn danger" data-leave="${esc(m.code)}">🚪 Выйти</button></div>
+      <div class="hint">${hint}</div>
+      <div class="actions">${startBtn}${inviteBtn}${waitBtn}<button class="btn danger" data-leave="${esc(m.code)}">🚪 Выйти</button></div>
     </div>`;
 }
 
@@ -285,7 +279,6 @@ function renderLobbies(){
 }
 
 function initOrbit(){
-  // Меньше частиц (7 вместо 14), без blur — заметно легче на телефоне
   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const orbit=document.getElementById('orbit');
   const emojis=['🎮','','🎤','','💬','','✨'];
@@ -314,14 +307,12 @@ function localJoin(code){
   state.my={code,host:g?g.host:myUid,host_nick:g?g.host_nick:'—',
     count:(g?g.count:0)+1,max:state.max,min:state.min,mode:g?g.mode:'text',
     players:players.slice(0,8),more:Math.max(0,players.length-8),mine:true,
-    isHost:(g?g.host:myUid)===myUid};
-  state.lobbies=state.lobbies.filter(x=>x.code!==code); // убираем из публичного списка
+    isHost:Number(g?g.host:myUid)===Number(myUid)};
+  state.lobbies=state.lobbies.filter(x=>x.code!==code);
   renderMy();renderLobbies();
   toast('🎉 Ты в игре '+code);
 }
-function localLeave(){
-  state.my=null;renderMy();renderLobbies();toast('👌 Ты вышел из лобби');
-}
+function localLeave(){state.my=null;renderMy();renderLobbies();toast('👌 Ты вышел из лобби');}
 function localStart(){document.getElementById('startOver').classList.add('show');}
 
 document.getElementById('createText').addEventListener('click',()=>{
@@ -341,6 +332,10 @@ document.getElementById('lobbiesList').addEventListener('click',e=>{
   const code=b.dataset.join;localJoin(code);sendAction('game_join',{code});});
 
 document.getElementById('mySection').addEventListener('click',e=>{
+  const copy=e.target.closest('[data-copy]');
+  if(copy){copyCode(copy.dataset.copy);return;}
+  const invite=e.target.closest('[data-invite]');
+  if(invite){sendAction('game_invite',{code:invite.dataset.invite},()=>toast('📨 Список игроков для приглашения — в чате бота'));return;}
   const leave=e.target.closest('[data-leave]');
   if(leave){localLeave();sendAction('game_leave',{code:leave.dataset.leave});return;}
   const start=e.target.closest('[data-start]');
