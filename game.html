@@ -8,437 +8,128 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg1:#12081f;
-  --bg2:#2d1b4e;
-  --bg3:#1a0b2e;
-  --accent:#8b3dff;
-  --accent2:#4b69ff;
-  --gold:#ffd700;
-  --green:#2ecc71;
-  --red:#e74c3c;
-  --text:#ffffff;
-  --muted:#b8a5d9;
-  --card:rgba(255,255,255,.06);
-  --border:rgba(255,255,255,.12);
+  --bg1:#12081f;--bg2:#2d1b4e;--bg3:#1a0b2e;
+  --accent:#8b3dff;--accent2:#4b69ff;--gold:#ffd700;
+  --green:#2ecc71;--red:#e74c3c;
+  --text:#fff;--muted:#b8a5d9;
+  --card:rgba(255,255,255,.05);--border:rgba(255,255,255,.10);
 }
 html,body{height:100%}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   color:var(--text);
-  background:linear-gradient(135deg,var(--bg3),var(--bg2),var(--bg1),var(--bg2),var(--bg3));
-  background-size:400% 400%;
-  animation:bgShift 18s ease infinite;
-  min-height:100vh;
-  overflow-x:hidden;
-  user-select:none;
+  /* СТАТИЧНЫЙ градиент — без animation background-position (это главная причина лагов) */
+  background:linear-gradient(160deg,var(--bg3),var(--bg2) 45%,var(--bg1));
+  background-attachment:fixed;
+  min-height:100vh;overflow-x:hidden;user-select:none;
+  -webkit-font-smoothing:antialiased;
 }
-@keyframes bgShift{
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
-}
-.orbit{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+/* Частицы: мало, без blur, только GPU-свойства */
+.orbit{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;contain:strict}
 .orbit span{
-  position:absolute;
-  bottom:-80px;
-  opacity:.12;
+  position:absolute;bottom:-60px;opacity:.10;will-change:transform,opacity;
   animation:floatUp linear infinite;
-  filter:blur(.2px);
 }
 @keyframes floatUp{
-  0%{transform:translateY(0) rotate(0deg) scale(.8);opacity:0}
-  10%{opacity:.16}
-  100%{transform:translateY(-120vh) rotate(360deg) scale(1.2);opacity:0}
+  0%{transform:translate3d(0,0,0) rotate(0);opacity:0}
+  12%{opacity:.14}
+  100%{transform:translate3d(0,-115vh,0) rotate(180deg);opacity:0}
 }
-.wrap{
-  position:relative;
-  z-index:2;
-  width:100%;
-  max-width:560px;
-  margin:0 auto;
-  padding:18px 16px 110px;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-}
-.brand{
-  font-size:18px;
-  font-weight:900;
-  letter-spacing:.5px;
-  background:linear-gradient(90deg,#fff,#ffd700,#8b3dff,#fff);
-  background-size:300% 100%;
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  animation:shineText 6s linear infinite;
-}
-@keyframes shineText{
-  0%{background-position:0% 50%}
-  100%{background-position:300% 50%}
-}
-.userchip{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  background:rgba(255,255,255,.08);
-  border:1px solid var(--border);
-  border-radius:999px;
-  padding:7px 12px;
-  font-size:12px;
-  font-weight:700;
-  backdrop-filter:blur(10px);
-  max-width:58%;
-}
-.userchip .nick{
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:120px;
-}
+.wrap{position:relative;z-index:2;width:100%;max-width:560px;margin:0 auto;
+  padding:16px 14px 90px;display:flex;flex-direction:column;gap:14px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.brand{font-size:18px;font-weight:900;letter-spacing:.5px;color:var(--gold);
+  text-shadow:0 2px 10px rgba(255,215,0,.25)}
+.userchip{display:flex;align-items:center;gap:8px;background:var(--card);
+  border:1px solid var(--border);border-radius:999px;padding:7px 12px;
+  font-size:12px;font-weight:700;max-width:58%}
+.userchip .nick{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
 .userchip .coins{color:var(--gold)}
-.hero{
-  position:relative;
-  border-radius:28px;
-  padding:26px 20px;
-  text-align:center;
-  background:linear-gradient(135deg,rgba(139,61,255,.22),rgba(75,105,255,.14),rgba(255,215,0,.08));
-  border:1px solid rgba(139,61,255,.45);
-  box-shadow:0 20px 60px rgba(139,61,255,.20), inset 0 0 40px rgba(255,255,255,.04);
-  overflow:hidden;
-  animation:breathe 4s ease-in-out infinite;
-}
-@keyframes breathe{
-  0%,100%{transform:translateY(0);box-shadow:0 20px 60px rgba(139,61,255,.18)}
-  50%{transform:translateY(-3px);box-shadow:0 26px 70px rgba(139,61,255,.28)}
-}
-.hero::before{
-  content:"";
-  position:absolute;
-  inset:-40%;
-  background:conic-gradient(from 0deg,transparent,rgba(255,255,255,.08),transparent 30%);
-  animation:rotateGlow 8s linear infinite;
-}
-@keyframes rotateGlow{to{transform:rotate(360deg)}}
-.hero-inner{position:relative;z-index:2}
-.hero h1{
-  font-size:32px;
-  line-height:1.05;
-  font-weight:950;
-  margin-bottom:10px;
-  text-shadow:0 8px 30px rgba(0,0,0,.35);
-}
-.hero p{
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.45;
-}
-.section{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:24px;
-  padding:18px;
-  backdrop-filter:blur(12px);
-  box-shadow:0 12px 40px rgba(0,0,0,.18);
-  animation:slideUp .45s ease both;
-}
-@keyframes slideUp{
-  from{opacity:0;transform:translateY(14px) scale(.98)}
-  to{opacity:1;transform:translateY(0) scale(1)}
-}
-.section h2{
-  font-size:16px;
-  font-weight:900;
-  margin-bottom:14px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.hidden{display:none !important}
-.create-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.btn{
-  border:none;
-  outline:none;
-  color:#fff;
-  font-weight:850;
-  border-radius:18px;
-  padding:14px 16px;
-  cursor:pointer;
-  transition:transform .15s ease, box-shadow .2s ease, opacity .2s ease;
-  position:relative;
-  overflow:hidden;
-  font-size:14px;
-}
-.btn::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(120deg,transparent 20%,rgba(255,255,255,.18) 40%,transparent 60%);
-  transform:translateX(-120%);
-  transition:transform .6s ease;
-}
-.btn:hover::after{transform:translateX(120%)}
+.hero{position:relative;border-radius:24px;padding:22px 18px;text-align:center;
+  background:linear-gradient(135deg,rgba(139,61,255,.18),rgba(75,105,255,.10),rgba(255,215,0,.06));
+  border:1px solid rgba(139,61,255,.35);overflow:hidden}
+.hero h1{font-size:28px;line-height:1.08;font-weight:950;margin-bottom:8px}
+.hero p{color:var(--muted);font-size:13px;line-height:1.45}
+.section{background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:16px;animation:slideUp .35s ease both}
+@keyframes slideUp{from{opacity:0;transform:translate3d(0,12px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+.section h2{font-size:15px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.hidden{display:none!important}
+.create-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:none;outline:none;color:#fff;font-weight:850;border-radius:16px;
+  padding:13px 14px;cursor:pointer;font-size:14px;position:relative;overflow:hidden;
+  transition:transform .12s ease,opacity .2s ease;will-change:transform}
 .btn:active{transform:scale(.96)}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.btn.big{padding:18px 14px;font-size:15px;border-radius:20px}
-.btn.primary{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  box-shadow:0 12px 30px rgba(139,61,255,.30);
-}
-.btn.purple{
-  background:linear-gradient(135deg,#b06bff,#7a2bff);
-  box-shadow:0 12px 30px rgba(122,43,255,.25);
-}
-.btn.gold{
-  background:linear-gradient(135deg,#ffd700,#ffb300);
-  color:#1b1000;
-  box-shadow:0 12px 30px rgba(255,215,0,.22);
-}
-.btn.green{
-  background:linear-gradient(135deg,#2ecc71,#1abc9c);
-  box-shadow:0 12px 30px rgba(46,204,113,.22);
-}
-.btn.danger{
-  background:linear-gradient(135deg,#e74c3c,#c0392b);
-  box-shadow:0 12px 30px rgba(231,76,60,.18);
-}
-.btn.ghost{
-  background:rgba(255,255,255,.08);
-  border:1px solid var(--border);
-}
-.join-row{
-  display:flex;
-  gap:10px;
-}
-.code-input{
-  flex:1;
-  min-width:0;
-  background:rgba(0,0,0,.22);
-  border:1px solid var(--border);
-  color:#fff;
-  border-radius:18px;
-  padding:14px;
-  font-size:22px;
-  font-weight:900;
-  letter-spacing:8px;
-  text-align:center;
-  text-transform:uppercase;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  outline:none;
-  transition:border-color .2s, box-shadow .2s;
-}
-.code-input:focus{
-  border-color:var(--gold);
-  box-shadow:0 0 0 3px rgba(255,215,0,.12);
-}
-.code-input::placeholder{
-  color:#7a6a94;
-  letter-spacing:4px;
-  font-size:16px;
-}
-.lobbies{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.lobby{
-  position:relative;
-  background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.03));
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:14px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  animation:popIn .4s ease both;
-  overflow:hidden;
-}
-@keyframes popIn{
-  from{opacity:0;transform:scale(.94) translateY(10px)}
-  to{opacity:1;transform:scale(1) translateY(0)}
-}
-.lobby::before{
-  content:"";
-  position:absolute;
-  left:0; top:0; bottom:0;
-  width:4px;
-  background:linear-gradient(180deg,var(--accent),var(--gold));
-}
-.lobby-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-}
-.code{
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  font-size:20px;
-  font-weight:950;
-  letter-spacing:3px;
-  color:var(--gold);
-  text-shadow:0 0 18px rgba(255,215,0,.25);
-}
-.badge{
-  font-size:11px;
-  font-weight:850;
-  padding:6px 10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  border:1px solid var(--border);
-  color:var(--muted);
-  white-space:nowrap;
-}
-.badge.mem{color:#b06bff;border-color:rgba(176,107,255,.35)}
-.badge.text{color:#7cc4ff;border-color:rgba(124,196,255,.25)}
-.meta{
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.4;
-}
-.players{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-}
-.player-pill{
-  font-size:11px;
-  font-weight:750;
-  padding:5px 9px;
-  border-radius:999px;
-  background:rgba(255,255,255,.07);
-  border:1px solid rgba(255,255,255,.10);
-  color:#e9dcff;
-}
+.btn.big{padding:16px 12px;font-size:15px}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.btn.purple{background:linear-gradient(135deg,#b06bff,#7a2bff)}
+.btn.gold{background:linear-gradient(135deg,#ffd700,#ffb300);color:#1b1000}
+.btn.green{background:linear-gradient(135deg,#2ecc71,#1abc9c)}
+.btn.danger{background:linear-gradient(135deg,#e74c3c,#c0392b)}
+.btn.ghost{background:rgba(255,255,255,.07);border:1px solid var(--border)}
+.join-row{display:flex;gap:8px}
+.code-input{flex:1;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--border);
+  color:#fff;border-radius:16px;padding:13px;font-size:20px;font-weight:900;letter-spacing:6px;
+  text-align:center;text-transform:uppercase;outline:none;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+.code-input:focus{border-color:var(--gold)}
+.code-input::placeholder{color:#7a6a94;letter-spacing:3px;font-size:15px}
+.lobbies{display:flex;flex-direction:column;gap:10px}
+.lobby{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  border:1px solid var(--border);border-radius:18px;padding:13px;display:flex;flex-direction:column;gap:8px;
+  animation:popIn .3s ease both;overflow:hidden}
+@keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.lobby::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--accent),var(--gold))}
+.lobby-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  font-size:18px;font-weight:950;letter-spacing:2px;color:var(--gold)}
+.badge{font-size:10px;font-weight:850;padding:5px 9px;border-radius:999px;
+  background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+.badge.mem{color:#b06bff;border-color:rgba(176,107,255,.3)}
+.badge.text{color:#7cc4ff;border-color:rgba(124,196,255,.2)}
+.meta{font-size:12px;color:var(--muted);line-height:1.4}
+.players{display:flex;flex-wrap:wrap;gap:5px}
+.player-pill{font-size:11px;font-weight:750;padding:4px 8px;border-radius:999px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#e9dcff}
 .player-pill.more{color:var(--muted)}
-.lobby-actions{
-  display:flex;
-  justify-content:flex-end;
-}
-.my-card{
-  background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(139,61,255,.14));
-  border:1px solid rgba(255,215,0,.30);
-  border-radius:22px;
-  padding:16px;
-  box-shadow:0 18px 50px rgba(255,215,0,.08);
-  animation:glowCard 3s ease-in-out infinite;
-}
-@keyframes glowCard{
-  0%,100%{box-shadow:0 18px 50px rgba(255,215,0,.06)}
-  50%{box-shadow:0 22px 60px rgba(255,215,0,.14)}
-}
-.my-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
-  gap:10px;
-}
-.live{
-  font-size:11px;
-  font-weight:900;
-  color:#7CFFB2;
-  letter-spacing:.8px;
-  animation:pulseLive 1.6s ease-in-out infinite;
-}
-@keyframes pulseLive{
-  0%,100%{opacity:.65}
-  50%{opacity:1}
-}
-.actions{
-  display:flex;
-  gap:10px;
-  margin-top:12px;
-}
+.lobby-actions{display:flex;justify-content:flex-end}
+.my-card{background:linear-gradient(135deg,rgba(255,215,0,.10),rgba(139,61,255,.12));
+  border:1px solid rgba(255,215,0,.25);border-radius:20px;padding:14px}
+.my-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
+.live{font-size:11px;font-weight:900;color:#7CFFB2;letter-spacing:.6px}
+.actions{display:flex;gap:8px;margin-top:10px}
 .actions .btn{flex:1}
-.empty{
-  text-align:center;
-  padding:26px 12px;
-  color:var(--muted);
-}
-.empty-emoji{
-  font-size:54px;
-  margin-bottom:10px;
-  animation:bounce 1.8s ease-in-out infinite;
-}
-@keyframes bounce{
-  0%,100%{transform:translateY(0) rotate(-4deg)}
-  50%{transform:translateY(-12px) rotate(4deg)}
-}
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:28px;
-  transform:translateX(-50%) translateY(30px);
-  background:rgba(20,10,35,.92);
-  border:1px solid rgba(255,255,255,.16);
-  color:#fff;
-  padding:12px 18px;
-  border-radius:18px;
-  font-size:13px;
-  font-weight:750;
-  box-shadow:0 16px 45px rgba(0,0,0,.35);
-  opacity:0;
-  pointer-events:none;
-  transition:all .25s ease;
-  z-index:80;
-  max-width:90vw;
-  text-align:center;
-  backdrop-filter:blur(12px);
-}
-.toast.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
-}
-.loading{
-  position:fixed;
-  inset:0;
-  background:rgba(8,4,16,.72);
-  backdrop-filter:blur(8px);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:14px;
-  z-index:90;
-}
-.spinner{
-  width:46px;
-  height:46px;
-  border-radius:50%;
-  border:4px solid rgba(255,255,255,.12);
-  border-top-color:var(--gold);
-  border-right-color:var(--accent);
-  animation:spin .8s linear infinite;
-}
+.empty{text-align:center;padding:22px 10px;color:var(--muted)}
+.empty-emoji{font-size:46px;margin-bottom:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate3d(-50%,24px,0);
+  background:rgba(20,10,35,.94);border:1px solid rgba(255,255,255,.14);color:#fff;
+  padding:11px 16px;border-radius:16px;font-size:13px;font-weight:750;opacity:0;
+  pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:80;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate3d(-50%,0,0)}
+.loading{position:fixed;inset:0;background:rgba(8,4,16,.6);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;z-index:90}
+.spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,.12);
+  border-top-color:var(--gold);border-right-color:var(--accent);animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{
-  font-size:14px;
-  font-weight:800;
-  color:#fff;
-  opacity:.92;
-}
-.warn{
-  background:rgba(231,76,60,.12);
-  border:1px solid rgba(231,76,60,.35);
-  color:#ffd7d7;
-  padding:12px;
-  border-radius:16px;
-  font-size:12px;
-  text-align:center;
-}
-@media (max-width:380px){
-  .hero h1{font-size:27px}
-  .create-grid{grid-template-columns:1fr}
-  .code-input{letter-spacing:5px;font-size:19px}
+.loading-text{font-size:13px;font-weight:800;opacity:.9}
+.warn{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);color:#ffd7d7;
+  padding:11px;border-radius:14px;font-size:12px;text-align:center}
+/* Полноэкранный баннер старта (контролируемое закрытие, не вылет) */
+.startover{position:fixed;inset:0;background:rgba(8,4,16,.92);z-index:95;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
+.startover.show{display:flex}
+.startover .big-emoji{font-size:72px;animation:bounce 1.4s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-14px,0)}}
+.startover h2{font-size:24px;font-weight:950}
+.startover p{color:var(--muted);font-size:14px;line-height:1.5;max-width:320px}
+@media (max-width:380px){.hero h1{font-size:24px}.create-grid{grid-template-columns:1fr}
+  .code-input{letter-spacing:4px;font-size:18px}}
+/* Уважение к настройке «уменьшить движение» — отключаем анимации */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .orbit{display:none}
 }
 </style>
 </head>
@@ -454,15 +145,11 @@ body{
     </div>
   </div>
 
-  <div id="notLinked" class="warn hidden">
-    ⚠️ Открой приложение через кнопку «🎮 ИГРАТЬ» в боте.
-  </div>
+  <div id="notLinked" class="warn hidden">⚠️ Открой приложение через кнопку «🎮 ИГРАТЬ» в боте.</div>
 
   <section class="hero">
-    <div class="hero-inner">
-      <h1>Собери друзей<br>и посмейся</h1>
-      <p>Создавай комнаты, заходи по коду, отвечай на вопросы и голосуй за самые смешные ответы.</p>
-    </div>
+    <h1>Собери друзей<br>и посмейся</h1>
+    <p>Создавай комнаты, заходи по коду, отвечай на вопросы и голосуй за самые смешные ответы.</p>
   </section>
 
   <section id="mySection" class="section hidden"></section>
@@ -495,260 +182,175 @@ body{
   <div class="loading-text" id="loadingText">Отправляю...</div>
 </div>
 
+<div id="startOver" class="startover">
+  <div class="big-emoji">🚀</div>
+  <h2>Игра началась!</h2>
+  <p>Вопросы и голосования приходят в личные сообщения бота. Жми «Закрыть» и смотри чат.</p>
+  <button class="btn gold big" id="startClose" style="min-width:180px">ЗАКРЫТЬ</button>
+</div>
+
 <script>
-const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-let linked = false;
-
-if (tg) {
-  tg.ready();
-  tg.expand();
-  linked = !!(tg.initData && tg.initData.length > 0 && tg.initDataUnsafe && tg.initDataUnsafe.user);
+const tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;
+let linked=false, myUid=null;
+if(tg){tg.ready();tg.expand();
+  linked=!!(tg.initData&&tg.initData.length>0&&tg.initDataUnsafe&&tg.initDataUnsafe.user);
+  if(linked&&tg.initDataUnsafe.user) myUid=tg.initDataUnsafe.user.id;
 }
+if(!linked){document.getElementById('notLinked').classList.remove('hidden');
+  document.querySelectorAll('button').forEach(b=>b.disabled=true);}
 
-if (!linked) {
-  document.getElementById('notLinked').classList.remove('hidden');
-  document.querySelectorAll('button').forEach(b => b.disabled = true);
-}
+const sp=new URLSearchParams(location.search);
+function parseJSON(s,f){try{return s?JSON.parse(s):f;}catch(e){return f;}}
 
-const sp = new URLSearchParams(location.search);
-
-function parseJSON(str, fallback) {
-  try {
-    return str ? JSON.parse(str) : fallback;
-  } catch (e) {
-    return fallback;
-  }
-}
-
-const state = {
-  nick: sp.get('nick') || 'Аноним',
-  tag: sp.get('tag') || '',
-  coins: parseInt(sp.get('coins') || '0', 10) || 0,
-  min: parseInt(sp.get('min') || '3', 10) || 3,
-  max: parseInt(sp.get('max') || '12', 10) || 12,
-  lobbies: parseJSON(sp.get('lobbies'), []),
-  my: parseJSON(sp.get('my'), null)
+const state={
+  nick:sp.get('nick')||'Аноним',
+  tag:sp.get('tag')||'',
+  coins:parseInt(sp.get('coins')||'0',10)||0,
+  min:parseInt(sp.get('min')||'3',10)||3,
+  max:parseInt(sp.get('max')||'12',10)||12,
+  lobbies:parseJSON(sp.get('lobbies'),[]),
+  my:parseJSON(sp.get('my'),null)
 };
+// дополняем my локальными флагами
+if(state.my){ state.my.isHost=(state.my.host===myUid); }
 
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, m => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[m]));
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function modeLabel(m){return m==='media'?'🖼 МЕМ':'📝 ТЕКСТ';}
+function modeBadge(m){return m==='media'?'badge mem':'badge text';}
+function generateCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
+
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2000);}
+function showLoading(t){document.getElementById('loadingText').textContent=t||'Отправляю...';
+  document.getElementById('loading').classList.remove('hidden');}
+function hideLoading(){document.getElementById('loading').classList.add('hidden');}
+function haptic(t){try{if(tg&&tg.HapticFeedback){if(t==='success')tg.HapticFeedback.notificationOccurred('success');
+  else if(t==='warning')tg.HapticFeedback.notificationOccurred('warning');else tg.HapticFeedback.impactOccurred(t||'light');}}catch(e){}}
+
+// Отправка боту БЕЗ закрытия приложения; onSuccess — локальное обновление экрана
+function sendAction(type,payload,onSuccess){
+  if(!linked){toast('⚠️ Открой через бота');return;}
+  const labels={game_create:'Создаю комнату...',game_join:'Вхожу в игру...',game_leave:'Выхожу...',game_start:'Запускаю...'};
+  showLoading(labels[type]);haptic('light');
+  try{
+    tg.sendData(JSON.stringify({type,...payload}));
+    setTimeout(()=>{hideLoading();haptic('success');if(typeof onSuccess==='function')onSuccess();},550);
+  }catch(e){hideLoading();haptic('warning');toast('❌ Не удалось отправить');}
 }
 
-function modeLabel(mode) {
-  return mode === 'media' ? '🖼 МЕМ' : '📝 ТЕКСТ';
+function renderUser(){
+  document.getElementById('userName').textContent=state.nick+(state.tag?` [${state.tag}]`:'');
+  document.getElementById('userCoins').textContent=`🪙 ${state.coins}`;
 }
 
-function modeBadgeClass(mode) {
-  return mode === 'media' ? 'badge mem' : 'badge text';
-}
-
-function toast(text) {
-  const el = document.getElementById('toast');
-  el.textContent = text;
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 2200);
-}
-
-function showLoading(text) {
-  document.getElementById('loadingText').textContent = text || 'Отправляю...';
-  document.getElementById('loading').classList.remove('hidden');
-}
-
-function hideLoading() {
-  document.getElementById('loading').classList.add('hidden');
-}
-
-function haptic(type) {
-  try {
-    if (tg && tg.HapticFeedback) {
-      if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
-      else if (type === 'warning') tg.HapticFeedback.notificationOccurred('warning');
-      else tg.HapticFeedback.impactOccurred(type || 'light');
-    }
-  } catch (e) {}
-}
-
-function sendAction(type, payload = {}) {
-  if (!linked) {
-    toast('⚠️ Открой через бота');
-    return;
-  }
-
-  const labels = {
-    game_create: 'Создаю комнату...',
-    game_join: 'Вхожу в игру...',
-    game_leave: 'Выхожу...',
-    game_start: 'Запускаю игру...'
-  };
-
-  showLoading(labels[type] || 'Отправляю...');
-  haptic('light');
-
-  try {
-    tg.sendData(JSON.stringify({ type, ...payload }));
-    setTimeout(() => {
-      hideLoading();
-      haptic('success');
-      toast('✅ Отправлено боту');
-      setTimeout(() => {
-        try { if (tg && tg.close) tg.close(); } catch (e) {}
-      }, 700);
-    }, 900);
-  } catch (e) {
-    hideLoading();
-    haptic('warning');
-    toast('❌ Не удалось отправить');
-  }
-}
-
-function renderUser() {
-  const nameEl = document.getElementById('userName');
-  const coinsEl = document.getElementById('userCoins');
-  nameEl.textContent = state.nick + (state.tag ? ` [${state.tag}]` : '');
-  coinsEl.textContent = `🪙 ${state.coins}`;
-}
-
-function renderMy() {
-  const sec = document.getElementById('mySection');
-  if (!state.my) {
-    sec.classList.add('hidden');
-    sec.innerHTML = '';
-    return;
-  }
-
-  const m = state.my;
-  sec.classList.remove('hidden');
-
-  const playersHtml = (m.players || []).map(p => `<span class="player-pill">${esc(p)}</span>`).join('') +
-    (m.more > 0 ? `<span class="player-pill more">+${m.more}</span>` : '');
-
-  const startBtn = m.can_start
+function renderMy(){
+  const sec=document.getElementById('mySection');
+  if(!state.my){sec.classList.add('hidden');sec.innerHTML='';return;}
+  const m=state.my;sec.classList.remove('hidden');
+  const playersHtml=(m.players||[]).map(p=>`<span class="player-pill">${esc(p)}</span>`).join('')+
+    (m.more>0?`<span class="player-pill more">+${m.more}</span>`:'');
+  // Кнопка «Начать» активна для хоста; бот сам проверит минимум игроков
+  const startBtn=m.isHost
     ? `<button class="btn green" data-start="${esc(m.code)}">▶️ Начать</button>`
-    : `<button class="btn ghost" disabled>Нужно ${m.min} игроков</button>`;
-
-  sec.innerHTML = `
+    : '';
+  sec.innerHTML=`
     <h2>🟢 Твоя комната</h2>
     <div class="my-card">
       <div class="my-head">
         <span class="live">● В ЛОББИ</span>
         <span class="code">${esc(m.code)}</span>
       </div>
-      <div class="meta">
-        Хост: <b>${esc(m.host_nick)}</b> · Игроков: <b>${m.count}/${m.max}</b> · Режим: <b>${modeLabel(m.mode)}</b>
-      </div>
-      <div class="players" style="margin-top:10px">${playersHtml || '<span class="player-pill">Пока один</span>'}</div>
-      <div class="actions">
-        ${startBtn}
-        <button class="btn danger" data-leave="${esc(m.code)}">🚪 Выйти</button>
-      </div>
-    </div>
-  `;
+      <div class="meta">Хост: <b>${esc(m.host_nick)}</b> · Игроков: <b>${m.count}/${m.max}</b> · Режим: <b>${modeLabel(m.mode)}</b></div>
+      <div class="players" style="margin-top:8px">${playersHtml||'<span class="player-pill">Пока один</span>'}</div>
+      <div class="actions">${startBtn}<button class="btn danger" data-leave="${esc(m.code)}">🚪 Выйти</button></div>
+    </div>`;
 }
 
-function renderLobbies() {
-  const list = document.getElementById('lobbiesList');
-
-  if (!state.lobbies || state.lobbies.length === 0) {
-    list.innerHTML = `
-      <div class="empty">
-        <div class="empty-emoji">🎮</div>
-        <p>Публичных комнат пока нет.<br>Создай свою — и друзья смогут зайти!</p>
-      </div>
-    `;
-    return;
+function renderLobbies(){
+  const list=document.getElementById('lobbiesList');
+  if(!state.lobbies||state.lobbies.length===0){
+    list.innerHTML=`<div class="empty"><div class="empty-emoji">🎮</div><p>Публичных комнат пока нет.<br>Создай свою — и друзья смогут зайти!</p></div>`;return;
   }
-
-  list.innerHTML = state.lobbies.map((g, i) => {
-    const playersHtml = (g.players || []).map(p => `<span class="player-pill">${esc(p)}</span>`).join('') +
-      (g.more > 0 ? `<span class="player-pill more">+${g.more}</span>` : '');
-
-    const joinBtn = g.mine
-      ? `<button class="btn ghost" disabled>Ты здесь</button>`
-      : `<button class="btn primary" data-join="${esc(g.code)}">Войти</button>`;
-
-    return `
-      <div class="lobby" style="animation-delay:${i * 70}ms">
-        <div class="lobby-top">
-          <span class="code">${esc(g.code)}</span>
-          <span class="${modeBadgeClass(g.mode)}">${modeLabel(g.mode)}</span>
-        </div>
-        <div class="meta">
-          Хост: <b>${esc(g.host_nick)}</b> · Игроков: <b>${g.count}/${g.max}</b>
-        </div>
-        <div class="players">${playersHtml || '<span class="player-pill">Пусто</span>'}</div>
-        <div class="lobby-actions">${joinBtn}</div>
-      </div>
-    `;
+  list.innerHTML=state.lobbies.map((g,i)=>{
+    const playersHtml=(g.players||[]).map(p=>`<span class="player-pill">${esc(p)}</span>`).join('')+
+      (g.more>0?`<span class="player-pill more">+${g.more}</span>`:'');
+    const joinBtn=g.mine?`<button class="btn ghost" disabled>Ты здесь</button>`
+      :`<button class="btn primary" data-join="${esc(g.code)}">Войти</button>`;
+    return `<div class="lobby" style="animation-delay:${i*50}ms">
+      <div class="lobby-top"><span class="code">${esc(g.code)}</span><span class="${modeBadge(g.mode)}">${modeLabel(g.mode)}</span></div>
+      <div class="meta">Хост: <b>${esc(g.host_nick)}</b> · Игроков: <b>${g.count}/${g.max}</b></div>
+      <div class="players">${playersHtml||'<span class="player-pill">Пусто</span>'}</div>
+      <div class="lobby-actions">${joinBtn}</div></div>`;
   }).join('');
 }
 
-function initOrbit() {
-  const orbit = document.getElementById('orbit');
-  const emojis = ['🎮','😂','🎤','🏆','💬','🎭','🔥','✨','🤣',''];
-  for (let i = 0; i < 14; i++) {
-    const s = document.createElement('span');
-    s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    s.style.left = Math.random() * 100 + '%';
-    s.style.fontSize = (18 + Math.random() * 34) + 'px';
-    s.style.animationDuration = (10 + Math.random() * 16) + 's';
-    s.style.animationDelay = (Math.random() * 12) + 's';
-    orbit.appendChild(s);
-  }
+function initOrbit(){
+  // Меньше частиц (7 вместо 14), без blur — заметно легче на телефоне
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const orbit=document.getElementById('orbit');
+  const emojis=['🎮','','🎤','','💬','','✨'];
+  for(let i=0;i<7;i++){const s=document.createElement('span');
+    s.textContent=emojis[i%emojis.length];
+    s.style.left=(Math.random()*100)+'%';
+    s.style.fontSize=(20+Math.random()*22)+'px';
+    s.style.animationDuration=(14+Math.random()*10)+'s';
+    s.style.animationDelay=(Math.random()*10)+'s';
+    orbit.appendChild(s);}
 }
 
-document.getElementById('createText').addEventListener('click', () => {
-  sendAction('game_create', { mode: 'text' });
-});
+// ===== Локальные переходы состояний (без закрытия приложения) =====
+function localCreate(mode){
+  const code=generateCode();
+  state.my={code,host:myUid,host_nick:state.nick,count:1,max:state.max,min:state.min,
+    mode,players:[state.nick],more:0,mine:true,isHost:true};
+  renderMy();renderLobbies();
+  toast('✅ Комната '+code+' создана');
+  return code;
+}
+function localJoin(code){
+  const g=state.lobbies.find(x=>x.code===code);
+  const players=g?(g.players||[]).slice():[];
+  if(!players.includes(state.nick))players.push(state.nick);
+  state.my={code,host:g?g.host:myUid,host_nick:g?g.host_nick:'—',
+    count:(g?g.count:0)+1,max:state.max,min:state.min,mode:g?g.mode:'text',
+    players:players.slice(0,8),more:Math.max(0,players.length-8),mine:true,
+    isHost:(g?g.host:myUid)===myUid};
+  state.lobbies=state.lobbies.filter(x=>x.code!==code); // убираем из публичного списка
+  renderMy();renderLobbies();
+  toast('🎉 Ты в игре '+code);
+}
+function localLeave(){
+  state.my=null;renderMy();renderLobbies();toast('👌 Ты вышел из лобби');
+}
+function localStart(){document.getElementById('startOver').classList.add('show');}
 
-document.getElementById('createMedia').addEventListener('click', () => {
-  sendAction('game_create', { mode: 'media' });
-});
+document.getElementById('createText').addEventListener('click',()=>{
+  const code=localCreate('text');sendAction('game_create',{mode:'text',code});});
+document.getElementById('createMedia').addEventListener('click',()=>{
+  const code=localCreate('media');sendAction('game_create',{mode:'media',code});});
 
-const codeInput = document.getElementById('codeInput');
-codeInput.addEventListener('input', () => {
-  codeInput.value = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
-});
+const codeInput=document.getElementById('codeInput');
+codeInput.addEventListener('input',()=>{codeInput.value=codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);});
+document.getElementById('joinBtn').addEventListener('click',()=>{
+  const code=codeInput.value.trim().toUpperCase();
+  if(code.length!==4){toast('⚠️ Введи код из 4 символов');haptic('warning');return;}
+  localJoin(code);sendAction('game_join',{code});codeInput.value='';});
 
-document.getElementById('joinBtn').addEventListener('click', () => {
-  const code = codeInput.value.trim().toUpperCase();
-  if (code.length !== 4) {
-    toast('⚠️ Введи код из 4 символов');
-    haptic('warning');
-    return;
-  }
-  sendAction('game_join', { code });
-});
+document.getElementById('lobbiesList').addEventListener('click',e=>{
+  const b=e.target.closest('[data-join]');if(!b||b.disabled)return;
+  const code=b.dataset.join;localJoin(code);sendAction('game_join',{code});});
 
-document.getElementById('lobbiesList').addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-join]');
-  if (!btn || btn.disabled) return;
-  sendAction('game_join', { code: btn.dataset.join });
-});
+document.getElementById('mySection').addEventListener('click',e=>{
+  const leave=e.target.closest('[data-leave]');
+  if(leave){localLeave();sendAction('game_leave',{code:leave.dataset.leave});return;}
+  const start=e.target.closest('[data-start]');
+  if(start){sendAction('game_start',{code:start.dataset.start},localStart);}});
 
-document.getElementById('mySection').addEventListener('click', (e) => {
-  const leave = e.target.closest('[data-leave]');
-  if (leave) {
-    sendAction('game_leave', { code: leave.dataset.leave });
-    return;
-  }
+document.getElementById('startClose').addEventListener('click',()=>{
+  document.getElementById('startOver').classList.remove('show');
+  try{if(tg&&tg.close)tg.close();}catch(e){}});
 
-  const start = e.target.closest('[data-start]');
-  if (start) {
-    sendAction('game_start', { code: start.dataset.start });
-  }
-});
-
-renderUser();
-renderMy();
-renderLobbies();
-initOrbit();
+renderUser();renderMy();renderLobbies();initOrbit();
 </script>
 </body>
 </html>
